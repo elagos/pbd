@@ -1,0 +1,954 @@
+{% extends 'template.html' %}
+{% block title %} Página | ChipSetManagement {% endblock %}
+
+{% block barraSuperior %}
+<div class="breadcrumb" style="background-color:white;">
+  <li><a href="{% url 'index' %}">Home</a><span class="divider">|</span></li>
+  <li><a href="">Servicios</a><span class="divider">|</span></li>
+  <li><a href="">Noticias</a><span class="divider">|</span></li>
+  <li><a href="">Promociones</a><span class="divider">|</span></li>
+  <li><a href="">Faceboook</a></li>
+</div>
+{% endblock %}
+
+{% block contenido %}
+<h2>Menú Administrador</h2>
+<br>
+<div class="tabbable tabs-right" style="border-bottom:1;">      
+  <ul class="nav nav-tabs">
+    <li class="active"><a href="#aSto" data-toggle="tab"><b>Adm. Stock</b></a></li>
+    <li class=""><a href="#aDis" data-toggle="tab"><b>Adm. Dispositivos</b></a></li>
+    <li class=""><a href="#aEqu" data-toggle="tab"><b>Adm.  Equipos Armados</b></a></li>
+    <li class=""><a href="#ASTe" data-toggle="tab"><b>Adm. S. Técnicos</b></a></li>
+    <li class=""><a href="#aCom" data-toggle="tab"><b>Adm. Compatibilidades</b></a></li>
+    <li class=""><a href="#aTyS" data-toggle="tab"><b>Adm. Tipos y Subtipos</b></a></li>
+    <li class=""><a href="#aEmp" data-toggle="tab"><b>Adm. Empleados</b></a></li>
+    <li class=""><a href="#aArm" data-toggle="tab"><b>Asignar Armado</b></a></li>
+    <li class=""><a href="#aSer" data-toggle="tab"><b>Asignar Servicio</b></a></li>
+    <li class=""><a href="#cArm" data-toggle="tab"><b>Confirmar Armado</b></a></li>
+    <li class=""><a href="#cServ" data-toggle="tab"><b>Confirmar Servicio</b></a></li>
+    <li class=""><a href="#rServ" data-toggle="tab"><b>Registrar Servicios</b></a></li>
+  </ul>
+
+  <div class="tab-content">
+    <div class="tab-pane active" id="aSto"><br>
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="astdisp">Dispositivo</label>
+          <div class="controls">
+            <select id="astdisp">
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="astcant">Cantidad a ingresar</label>
+          <div class="controls"><input type="text" id="astcant"></div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <button type="submit" class="btn" href="#seguro" data-toggle="modal">Ingresar</button>
+          </div>
+        </div>
+      </form>
+    </div><!--Administrar Compatibilidades-->
+    
+    <div class="tab-pane" id="aDis"><br>
+      <a class="btn" href="#agDisp" role="button" data-toggle="modal">Agregar Dispositivo</a><br><br>
+      <a class="btn" href="#elDisp" role="button" data-toggle="modal">Eliminar Dispositivo</a><br><br>
+      <a class="btn" href="#edDisp" role="button" data-toggle="modal">Editar Dispositivo</a>
+    </div><!--Administrar Dispositivos-->
+    
+    <div class="tab-pane" id="aEqu"><br>
+      <a class="btn" href="#agEqui" role="button" data-toggle="modal">Agregar Equipo</a><br><br>
+      <a class="btn" href="#elEqui" role="button" data-toggle="modal">Eliminar Equipo</a><br><br>
+      <a class="btn" href="#edEqui" role="button" data-toggle="modal">Editar Equipo</a>
+    </div><!--Administrar Equipos-->
+    
+    <div class="tab-pane" id="ASTe"><br>
+      <a class="btn" href="#agStec" role="button" data-toggle="modal">Agregar S. Técnico</a><br><br>
+      <a class="btn" href="#elStec" role="button" data-toggle="modal">Eliminar S. Técnico</a><br><br>
+      <a class="btn" href="#edStec" role="button" data-toggle="modal">Editar S. Técnico</a>
+    </div><!--Administrar S. Técnicos-->
+    
+    <div class="tab-pane" id="aCom"><br>
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="acodisp">Dispositivo</label>
+          <div class="controls">
+            <select id="acodisp">
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">Es compatible con:</label>
+          <div class="controls">
+            <select>
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <select>
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <select>
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <select>
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <select>
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label">Es incompatible con:</label>
+          <div class="controls">
+            <select>
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <select>
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <select>
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <select>
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <select>
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <button type="submit" class="btn" href="#seguro" data-toggle="modal">Ingresar</button>
+          </div>
+        </div>
+      </form>
+    </div><!--Administrar Compatibilidades-->
+    
+    <div class="tab-pane" id="aTyS"><br><p>holi</p></div><!--Administrar Tipos y Subtipos-->
+    
+    <div class="tab-pane" id="aEmp"><br>
+      <a class="btn" href="#agEmpl" role="button" data-toggle="modal">Agregar Empleado</a><br><br>
+      <a class="btn" href="#elEmpl" role="button" data-toggle="modal">Eliminar Empleado</a><br><br>
+      <a class="btn" href="#edEmpl" role="button" data-toggle="modal">Editar Empleado</a>
+    </div><!--Administrar Empleados-->
+    
+    <div class="tab-pane" id="aArm"><br>
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="aardisp">Dispositivo</label>
+          <div class="controls">
+            <select id="aardisp">
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="aaremp">Empleado</label>
+          <div class="controls">
+            <select id="aaremp">
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <button type="submit" class="btn" href="#seguro" data-toggle="modal">Asignar</button>
+          </div>
+        </div>
+      </form>
+    </div><!--Asignar Armado-->
+    
+    <div class="tab-pane" id="aSer"><br>
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="aseserv">Servicio</label>
+          <div class="controls">
+            <select id="aserserv">
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="aseemp">Empleado</label>
+          <div class="controls">
+            <select id="aseemp">
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <button type="submit" class="btn" href="#seguro" data-toggle="modal">Asignar</button>
+          </div>
+        </div>
+      </form>
+    </div><!--Asignar Servicio-->
+    
+    <div class="tab-pane" id="cArm"><br>
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="confarm">Confirmar Armado</label>
+          <div class="controls">
+            <select id="confarm">
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <button type="submit" class="btn" href="#seguro" data-toggle="modal">Confirmar</button>
+          </div>
+        </div>
+      </form>
+    </div><!--Confirmar Armado-->
+    
+    <div class="tab-pane" id="cServ"><br>
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="confserv">Confirmar Servicio</label>
+          <div class="controls">
+            <select id="confserv">
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <button type="submit" class="btn" href="#seguro" data-toggle="modal">Confirmar</button>
+          </div>
+        </div>
+      </form>
+    </div><!--Confirmar Armado-->
+    
+    <div class="tab-pane" id="rServ"><br>
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="rserv1">Servicio</label>
+          <div class="controls">
+            <select id="rserv1">
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="rdesc1">Descripción</label>
+          <div class="controls"><textarea class="span3" rows="5" id="rdesc1"></textarea></div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="rserv2">Servicio</label>
+          <div class="controls">
+            <select id="rserv2">
+              <option class="muted">Seleccionar</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="rdesc2">Descripción</label>
+          <div class="controls"><textarea class="span3" rows="5" id="rdesc2"></textarea></div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <button type="submit" class="btn" href="#seguro" data-toggle="modal">Confirmar</button>
+          </div>
+        </div>
+      </form>
+    </div><!--Registrar Servicio-->
+  </div><!--Tab Content-->
+</div>
+{% endblock %}
+
+{% block modales %}
+<div id="seguro" class="modal hide fade" aria-labellledby="modalLabel" ariahidden="true">      
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+    <h3 id="modalLabel">Confirmación</h3>
+  </div>      
+  <div class="modal-body">
+    <p>¿Está seguro?</p>
+  </div>      
+  <div class="modal-footer">
+    <button class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar
+    </button>
+    <button class="btn btn-success">Confirmar</button>
+  </div>
+</div><!--Seguro?-->
+
+<div id="agDisp" class="modal hide fade" aria-labellledby="modalLabel" ariahidden="true">      
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+    <h3 id="modalLabel">Agregar Dispositivo</h3>
+  </div>      
+  <div class="modal-body">
+    <form class="form-horizontal">
+      <div class="control-group">
+        <label class="control-label" for="agrdisp">Nombre</label>
+        <div class="controls"><input type="text" id="agrdisp"></div>
+      </div>
+    </form>
+  </div>      
+  <div class="modal-footer">
+    <button class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+    <button class="btn btn-success">Agregar</button>
+  </div>
+</div><!--agDisp-->
+
+<div id="elDisp" class="modal hide fade" aria-labellledby="modalLabel" ariahidden="true">      
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+    <h3 id="modalLabel">Eliminar Dispositivo</h3>
+  </div>      
+  <div class="modal-body">
+    <form class="form-horizontal">
+      <div class="control-group">
+        <label class="control-label" for="elidisp">Dispositivo</label>
+        <div class="controls">
+          <select id="elidisp">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+          </select>
+        </div>
+      </div>
+    </form>
+  </div>      
+  <div class="modal-footer">
+    <button class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+    <button class="btn btn-success">Eliminar</button>
+  </div>
+</div><!--elDisp-->
+
+<div id="edDisp" class="modal hide fade" aria-labellledby="modalLabel" ariahidden="true">      
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+    <h3 id="modalLabel">Editar Dispositivo</h3>
+  </div>      
+  <div class="modal-body">
+    <form class="form-horizontal">
+      <div class="control-group">
+        <label class="control-label" for="edidisp">Dispositivo</label>
+        <div class="controls">
+          <select id="edidisp">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="nom">Nombre</label>
+        <div class="controls"><input type="text" id="nom"></div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="img">Imagen</label>
+        <div class="controls"><input type="text" id="img"></div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="precio">Precio</label>
+        <div class="controls"><input type="text" id="precio"></div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="desc">Descripción</label>
+        <div class="controls"><textarea class="span3" rows="5" id="desc"></textarea></div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="carac">Características</label>
+        <div class="controls"><textarea class="span3" rows="5" id="carac"></textarea></div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="subt">Subtipo</label>
+        <div class="controls">
+          <select id="subt">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+          </select>
+        </div>
+      </div>
+    </form>
+  </div>      
+  <div class="modal-footer">
+    <button class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+    <button class="btn btn-success">Editar</button>
+  </div>
+</div><!--edDsip-->
+
+<div id="agEqui" class="modal hide fade" aria-labellledby="modalLabel" ariahidden="true">      
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+    <h3 id="modalLabel">Agregar Equipo</h3>
+  </div>      
+  <div class="modal-body">
+    <form class="form-horizontal">
+      <div class="control-group">
+        <label class="control-label" for="Equi">Nombre</label>
+        <div class="controls"><input type="text" id="Equi"></div>
+      </div>
+    </form>
+  </div>      
+  <div class="modal-footer">
+    <button class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+    <button class="btn btn-success">Agregar</button>
+  </div>
+</div><!--agEqui-->
+
+<div id="elEqui" class="modal hide fade" aria-labellledby="modalLabel" ariahidden="true">      
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+    <h3 id="modalLabel">Eliminar Equipo</h3>
+  </div>      
+  <div class="modal-body">
+    <form class="form-horizontal">
+      <div class="control-group">
+        <label class="control-label" for="eliEqui">Equipo</label>
+        <div class="controls">
+          <select id="eliEqui">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+          </select>
+        </div>
+      </div>
+    </form>
+  </div>      
+  <div class="modal-footer">
+    <button class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+    <button class="btn btn-success">Eliminar</button>
+  </div>
+</div><!--elEqui-->
+
+<div id="edEqui" class="modal hide fade" aria-labellledby="modalLabel" ariahidden="true">      
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+    <h3 id="modalLabel">Editar Equipo</h3>
+  </div>      
+  <div class="modal-body">
+    <form class="form-horizontal">
+      <div class="control-group">
+        <label class="control-label" for="ediEqui">Equipo</label>
+        <div class="controls">
+          <select id="ediEqui">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="edienom">Nombre</label>
+        <div class="controls"><input type="text" id="edienom"></div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="tMad">Tarjeta Madre</label>
+        <div class="controls">
+          <select id="tMad">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="proc">Procesador</label>
+        <div class="controls">
+          <select id="proc">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="tGraf">Tarjeta Gráfica</label>
+        <div class="controls">
+          <select id="tGraf">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="dDur">Disco Duro</label>
+        <div class="controls">
+          <select id="dDur">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="mem">Memoria</label>
+        <div class="controls">
+          <select id="mem">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="uOpt">Unidad Óptica</label>
+        <div class="controls">
+          <select id="uOpt">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="rCpu">Refrigeración CPU</label>
+        <div class="controls">
+          <select id="rCpu">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="fPod">Fuente de Poder</label>
+        <div class="controls">
+          <select id="fPod">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="gab">Gabinete</label>
+        <div class="controls">
+          <select id="gab">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="tec">Teclado</label>
+        <div class="controls">
+          <select id="tec">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="mou">Mouse</label>
+        <div class="controls">
+          <select id="mou">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="par">Parlantes</label>
+        <div class="controls">
+          <select id="par">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="sOpe">Sistema Operativo</label>
+        <div class="controls">
+          <select id="sOpe">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="mon">Monitor</label>
+        <div class="controls">
+          <select id="mon">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="acc">Accesorios</label>
+        <div class="controls">
+          <select id="acc">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+          </select>
+        </div>
+      </div>
+      <h3 style="text-align:center;">Total: $XXXXXX</h3>
+      <div class="control-group">
+        <label class="control-label" for="edieprec">Precio</label>
+        <div class="controls"><input type="text" id="edieprec"></div>
+      </div>
+    </form>
+  </div>      
+  <div class="modal-footer">
+    <button class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+    <button class="btn btn-success">Editar</button>
+  </div>
+</div><!--edEqui-->
+
+<div id="agStec" class="modal hide fade" aria-labellledby="modalLabel" ariahidden="true">      
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+    <h3 id="modalLabel">Agregar S. Técnico</h3>
+  </div>      
+  <div class="modal-body">
+    <form class="form-horizontal">
+      <div class="control-group">
+        <label class="control-label" for="dispser">Nombre</label>
+        <div class="controls"><input type="text" id="dispser"></div>
+      </div>
+    </form>
+  </div>      
+  <div class="modal-footer">
+    <button class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+    <button class="btn btn-success">Agregar</button>
+  </div>
+</div><!--agStec-->
+
+<div id="elStec" class="modal hide fade" aria-labellledby="modalLabel" ariahidden="true">      
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+    <h3 id="modalLabel">Eliminar S. Técnico</h3>
+  </div>      
+  <div class="modal-body">
+    <form class="form-horizontal">
+      <div class="control-group">
+        <label class="control-label" for="elserv">Servicio</label>
+        <div class="controls">
+          <select id="elserv">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+          </select>
+        </div>
+      </div>
+    </form>
+  </div>      
+  <div class="modal-footer">
+    <button class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+    <button class="btn btn-success">Eliminar</button>
+  </div>
+</div><!--elStec-->
+
+<div id="edStec" class="modal hide fade" aria-labellledby="modalLabel" ariahidden="true">      
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+    <h3 id="modalLabel">Editar S. Técnico</h3>
+  </div>      
+  <div class="modal-body">
+    <form class="form-horizontal">
+      <div class="control-group">
+        <label class="control-label" for="edserv">Servicio</label>
+        <div class="controls">
+          <select id="edserv">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="nomser">Nombre</label>
+        <div class="controls"><input type="text" id="nomser"></div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="espser">Especificaciones</label>
+        <div class="controls"><textarea class="span3" rows="5" id="espser"></textarea></div>
+      </div>
+    </form>
+  </div>      
+  <div class="modal-footer">
+    <button class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+    <button class="btn btn-success">Editar</button>
+  </div>
+</div><!--edStec-->
+
+<div id="agEmpl" class="modal hide fade" aria-labellledby="modalLabel" ariahidden="true">      
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+    <h3 id="modalLabel">Agregar Empleado</h3>
+  </div>      
+  <div class="modal-body">
+    <form class="form-horizontal">
+      <div class="control-group">
+        <label class="control-label" for="agremp">RUT</label>
+        <div class="controls"><input type="text" id="agremp"></div>
+      </div>
+    </form>
+  </div>      
+  <div class="modal-footer">
+    <button class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+    <button class="btn btn-success">Agregar</button>
+  </div>
+</div><!--agEmpl-->
+
+<div id="elEmpl" class="modal hide fade" aria-labellledby="modalLabel" ariahidden="true">      
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+    <h3 id="modalLabel">Eliminar Empleado</h3>
+  </div>      
+  <div class="modal-body">
+    <form class="form-horizontal">
+      <div class="control-group">
+        <label class="control-label" for="eliemp">Empleado</label>
+        <div class="controls">
+          <select id="eliemp">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+          </select>
+        </div>
+      </div>
+    </form>
+  </div>      
+  <div class="modal-footer">
+    <button class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+    <button class="btn btn-success">Eliminar</button>
+  </div>
+</div><!--elEmpl-->
+
+<div id="edEmpl" class="modal hide fade" aria-labellledby="modalLabel" ariahidden="true">      
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+    <h3 id="modalLabel">Editar Empleado</h3>
+  </div>      
+  <div class="modal-body">
+    <form class="form-horizontal">
+      <div class="control-group">
+        <label class="control-label" for="ediemp">Empleado</label>
+        <div class="controls">
+          <select id="ediemp">
+            <option class="muted">Seleccionar</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="edempnom">Nombre</label>
+        <div class="controls"><input type="text" id="edempnom"></div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="edemprut">RUT</label>
+        <div class="controls"><input type="text" id="edemprut"></div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="edempmail">E-Mail</label>
+        <div class="controls"><input type="text" id="edempmail"></div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="edemptel">Teléfono</label>
+        <div class="controls"><input type="text" id="edemptel"></div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="adminsi">Administrador</label>
+        <div class="controls">
+          <label class="radio">
+            <input type="radio" name="administra" id="adminsi" value="option1">Sí
+          </label>
+          <label class="radio">
+            <input type="radio" name="administra" id="adminno" value="option2" checked>No
+          </label>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="armasi">Arma PC</label>
+        <div class="controls">
+          <label class="radio">
+            <input type="radio" name="armapcs" id="armasi" value="option1">Sí
+          </label>
+          <label class="radio">
+            <input type="radio" name="armapcs" id="armano" value="option2" checked>No
+          </label>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="realservsi">Realiza Servicio</label>
+        <div class="controls">
+          <label class="radio">
+            <input type="radio" name="realservicios" id="realservsi" value="option1">Sí
+          </label>
+          <label class="radio">
+            <input type="radio" name="realservicios" id="realservno" value="option2" checked>No
+          </label>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="edempcont">Contraseña</label>
+        <div class="controls"><input type="password" id="edempcont"></div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="edempccont">Confirmar Contraseña</label>
+        <div class="controls"><input type="password" id="edempccont"></div>
+      </div>
+    </form>
+  </div>      
+  <div class="modal-footer">
+    <button class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+    <button class="btn btn-success">Editar</button>
+  </div>
+</div><!--edEmpl-->
+{% endblock %}
