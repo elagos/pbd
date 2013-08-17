@@ -1,0 +1,16 @@
+from django.db import models
+
+#Tabla Cliente
+class Cliente(models.Model):
+	rut = models.IntegerField(primary_key=True)
+	nombre = models.CharField(max_length=200)
+	mail = models.EmailField()
+	telefono = models.IntegerField(20)
+	password = models.CharField(max_length=20)
+	
+	def __unicode__(self):
+		return self.nombre
+	
+	class Admin:
+		pass
+		

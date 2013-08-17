@@ -1,0 +1,88 @@
+{% extends 'template.html' %}
+{% block title %} Inicio | Chipset Management {% endblock %}
+
+{% block barraSuperior %}
+<div class="breadcrumb" style="background-color:white;">
+  <li class="active">Home<span class="divider">|</span></li>
+  <li><a href="#">Servicios</a><span class="divider">|</span></li>
+  <li><a href="#">Noticias</a><span class="divider">|</span></li>
+  <li><a href="#">Promociones</a><span class="divider">|</span></li>
+  <li><a href="#">Faceboook</a></li>
+</div>
+{% endblock %}
+
+{% block contenido %}
+<h2>Productos Destacados</h2><br>
+
+<div class="btn-group">
+  <button class="btn">Ordenar por:</button>
+  <button class="btn dropdown-toggle" data-toggle="dropdown">
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu">
+    <li><a href="">Opcion 1</a></li>
+    <li><a href="">Opcion 2</a></li>
+    <li><a href="">Opcion 3</a></li>
+  </ul>
+</div><br><br>
+
+<ul class="thumbnails" style="text-align:center;">
+	<li class="">
+    <div class="thumbnail">
+      <img src="http://images2.wikia.nocookie.net/__cb20120801131931/leagueoflegends/images/2/28/RyzeSquare.png" alt="">
+      <h3>Producto X</h3>
+      <p>Precio: $0</p>
+    </div>
+  </li>
+  <li class="">
+    <div class="thumbnail">
+      <img src="http://images2.wikia.nocookie.net/__cb20120801131931/leagueoflegends/images/2/28/RyzeSquare.png" alt="">
+      <h3>Producto X</h3>
+      <p>Precio: $0</p>
+    </div>
+  </li>
+  <li class="">
+    <div class="thumbnail">
+      <img src="http://images2.wikia.nocookie.net/__cb20120801131931/leagueoflegends/images/2/28/RyzeSquare.png" alt="">
+      <h3>Producto X</h3>
+      <p>Precio: $0</p>
+    </div>
+  </li>
+  <li class="">
+    <div class="thumbnail">
+      <img src="http://images2.wikia.nocookie.net/__cb20120801131931/leagueoflegends/images/2/28/RyzeSquare.png" alt="">
+      <h3>Producto X</h3>
+      <p>Precio: $0</p>
+    </div>
+  </li>
+  <li class="">
+    <div class="thumbnail">
+      <img src="http://images2.wikia.nocookie.net/__cb20120801131931/leagueoflegends/images/2/28/RyzeSquare.png" alt="">
+      <h3>Producto X</h3>
+      <p>Precio: $0</p>
+    </div>
+  </li>
+  <li class="">
+    <div class="thumbnail">
+      <img src="http://images2.wikia.nocookie.net/__cb20120801131931/leagueoflegends/images/2/28/RyzeSquare.png" alt="">
+      <h3>Producto X</h3>
+      <p>Precio: $0</p>
+    </div>
+  </li>
+  <li class="">
+    <div class="thumbnail">
+      <img src="http://images2.wikia.nocookie.net/__cb20120801131931/leagueoflegends/images/2/28/RyzeSquare.png" alt="">
+      <h3>Producto X</h3>
+      <p>Precio: $0</p>
+    </div>
+  </li>  
+</ul>
+
+<br>
+<a href="{% url 'menuA' %}">Menú Administrador</a>
+<br>
+<a href="{% url 'menuE' %}">Menú Empleados</a>
+{% endblock %}
+
+{% block modales %}
+{% endblock %}

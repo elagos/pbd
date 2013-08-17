@@ -1,0 +1,29 @@
+<html>
+<head>
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="LokoHanks">
+    <!-- Todo el Estilo -->
+    <link rel="shortcut icon" href="/media/img/favico.png" type='image/x-icon'>
+    <link href="/media/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/media/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
+</head>
+<body>
+    <h1>holo</h1>
+
+    {% if form.errors %}
+        <p style="color: red;">
+            revisa esto compadre{{ form.errors|pluralize }} below.
+        </p>
+    {% endif %}
+
+    <form action="" method="post">
+        {{ formulario.as_p }}
+        {% csrf_token %}
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
