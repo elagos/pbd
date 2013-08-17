@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django import forms
 from mysite.apps.models import *
+from datetimewidget.widgets import DateTimeWidget
 
 #form registro usuario en la web
 class registroUsuario(forms.Form):
@@ -42,7 +43,16 @@ class subtipoForm(forms.ModelForm):
 class abastecimientoForm(forms.ModelForm):
 	class Meta:
 		model = Abastecimiento
+		#exclude = ('producto_abast')
+		opcionesFecha = {
+			'format': 'dd/mm/yyyy HH:ii P',
+			'autoclose': 'true',
+			'showMeridian' : 'true'
+		}
+		widgets = {
+				'fecha': DateTimeWidget(options = opcionesFecha)
+		}
 
-class editarTipo(forms.Form):
-
-	nuevo_nombre = forms.CharField()
+class caracteristicaForm(forms.ModelForm):
+	class Meta:
+		model = Caracteristica

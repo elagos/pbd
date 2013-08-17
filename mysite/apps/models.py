@@ -9,9 +9,6 @@ CHOICES = (
     (False, "No")
 )
 
-class ProductoDestacado(models.Model):
-	pass
-
 #Tabla Productos
 class Producto(models.Model):
 	nombre_produc = models.CharField("nombre producto",max_length = 200, blank = False)
@@ -20,10 +17,11 @@ class Producto(models.Model):
 	def __unicode__(self):
 		return self.nombre_produc
 
+#OJOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO FALTA VALIDAR QUE CANTIDAD SEA POSITIVA!!!
 #Tabla de los abastecimientos de productos
 class Abastecimiento(models.Model):
 	producto_abast = models.ForeignKey(Producto, related_name = 'abast_producto', verbose_name = "Producto a ingresar")
-	cant_abast = models.IntegerField("cantidad")
+	cant_abast = models.IntegerField("cantidad") 
 	fecha = models.DateTimeField("fecha")
 
 	def __unicode__(self):
@@ -54,7 +52,7 @@ class Subtipo(models.Model):
 class Caracteristica(models.Model):
 	subtipo = models.ForeignKey(Subtipo)
 	nombre_caracteristica = models.CharField("nombre caracteristica", max_length = 200, blank = False)
-	unidad = models.IntegerField("unidad de medida", blank = True)
+	unidad = models.CharField("unidad de medida", max_length= 50, blank = True)
 
 	def __unicode__(self):
 		return u'%s %s' % (self.nombre_caracteristica, self.unidad)
@@ -68,14 +66,13 @@ class Dispositivo(Producto):
 	imagen_disp = models.ImageField("imagen",upload_to = 'productos/',)
 	descrip_disp = models.TextField("descripcion")
 
-
 	def __unicode__(self):
 		return u'%s %s %s %s %s' % (self.cantidad_disp,self.precio_disp,self.descrip_disp,self.nombre_produc, self.imagen_disp)
 
 class DetalleCaracteristica(models.Model):
 	caracteristica = models.ForeignKey(Caracteristica, verbose_name = "Caracteristica")
 	dispositivo = models.ForeignKey(Dispositivo, verbose_name = "Dispositivo")
-	medida = models.IntegerField("unidad de medida",null = True)
+	medida = models.IntegerField("valor")
 
 #Tabla intermedia entre EquipoArmado y Dispositivos
 class DetalleEquipo(models.Model):

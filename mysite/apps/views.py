@@ -79,9 +79,6 @@ def agregar_tipo(request):
 		formulario = tipoForm() 
 	return render(request, 'agregar_tipo.html',{'agregarTipoForm':formulario})
 
-def all_tipos(request):
-	tipos = Tipo.objects.all()
-
 #FALTA VALIDAR NULL
 def editar_tipo(request):
 	lista_tipos = Tipo.objects.all()
@@ -135,7 +132,7 @@ def agregar_subtipo(request):
 			if nuevo_sub_subtipo:
 				add_subsubtipo = Subtipo(sub_subtipo = nuevo_sub_subtipo)
 			
-			#Almacenamos en la bas de datos
+			#Almacenamos en la base de datos
 			nuevo_subtipo.save()
 			nuevo_subtipo_form = subtipoForm()
 			success = True
@@ -160,39 +157,64 @@ def eliminar_subtipo(request):
 		return render_to_response('eliminar_subtipo.html',ctx, context_instance = RequestContext(request))
 	else:
 		ctx = {'lista_subtipos':lista_subtipos}
-	return render_to_response('eliminar_subtipo.html',ctx,context_instance = RequestContext(request))
+		return render_to_response('eliminar_subtipo.html',ctx,context_instance = RequestContext(request))
 
+"""
+def editar_subtipo(request):
+		lista_subtipos = Subtipo.objects.all()
+		if request.method == 'POST':
+				subtipoEscogido = request.POST.get['subtipo']
+				nuevo_nombre_subtipo = request.POST.get['']
+
+				#Trigger
+				if Dispositivo.objects.filter(subtipo_disp = subtipoEscogido):
+					for dispositivo in disp_editar:
+						dispositivo.update(subtipo_disp = nuevo_nombre_subtipo)
+
+				if carac_editar = Caracteristica.objects.filter()
+
+
+				editar_tipo = Subtipo.objects.filter(nombre_subtipo = subtipoEscogido).update(nombre_subtipo = nuevo_nombre_subtipo)
+				formulario = editarSubtipoForm()
+				success = True
+				ctx = {'success': success,'editarSubtipoForm':formulario,'lista_tipos':lista_tipos}
+		else:
+			formulario = editarSubtipoForm()
+			ctx = {'editarSubtipoForm':formulario,'lista_subtipos':lista_subtipos}
+	return render_to_response('editar_subtipo.html',ctx,context_instance = RequestContext(request))
+"""
+
+#FALTA CORREGIR LO DE EDITAR_DISPOSITIVO PARA QUE ESTO QUEDE BUENO
 def ingresar_stock(request):
-	dispositivos = Dispositivo.objects.all()
+	lista_dispositivo = Dispositivo.objects.all()
+	lista_subtipo = Subtipo.objects.all()
+	lista_stock = Abastecimiento.objects.all()
 	if request.method == 'POST':
 		formulario = abastecimientoForm(request.POST)
 		if formulario.is_valid():
 			producto = formulario.cleaned_data['producto_abast']
 			cantidad = formulario.cleaned_data['cant_abast']
-			#fecha = formulario.cleaned_data['fecha_abast']
-
-			#Falta fecha!!!!!!!!
-			nuevo_abastecimiento.save()
+			fecha = formulario.cleaned_data['fecha']
+			#producto = request.POST.get('disp_elegido')
+			nuevo_abast = Abastecimiento(producto_abast = producto, cant_abast = cantidad, fecha = fecha)
 			stockForm = abastecimientoForm()
+			nuevo_abast.save()
 			success = True
-			ctx_success = {'success':success,'stockForm':stockForm}
-			return render_to_response('#',ctx_success, context_instance = RequestContext(request))
+			stockForm = abastecimientoForm()
+
+			#Trigger que suma la cantidada a tabla "Dispositivo"
+			dispositivo = Dispositivo.objects.get(nombre_produc = producto)
+			nueva_cantidad = dispositivo.cantidad_disp + cantidad
+			producto_id = dispositivo.id
+			update_cantidad = Dispositivo.objects.get(id = producto_id)
+			update_cantidad.cantidad_disp = nueva_cantidad
+			update_cantidad.save()
+			disp_nueva_cant = Dispositivo.objects.get(id = producto_id)
+			ctx = {'success':success,'stockForm':stockForm,'lista_stock':lista_stock,'dispositivo':disp_nueva_cant}
 	else:
 		formulario = abastecimientoForm() 
-		ctx_fail = {'stockForm':formulario}
-	return render_to_response('#', ctx_fail,context_instance = RequestContext(request))
-
-def ver_lista_stocks():
-	pass
-
-def ver_servicio():
-	pass
-
-def subir_imagen(f):
-    destination = open('some/file/name.txt', 'wb+')
-    for chunk in f.chunks():
-        destination.write(chunk)
-    destination.close()
+		ctx = {'stockForm':formulario,'lista_subtipo':lista_subtipo,'lista_dispositivo':lista_dispositivo,'lista_stock':lista_stock}
+	return render_to_response('ingresar_stock.html', ctx,context_instance = RequestContext(request))
 
 def agregar_dispositivo(request):
 	hay_dispositivos = Dispositivo.objects.all()
@@ -205,7 +227,7 @@ def agregar_dispositivo(request):
 			descripcion = formulario.cleaned_data['descrip_disp']
 			imagen = formulario.cleaned_data['imagen_disp']
 			marca = formulario.cleaned_data['marca_disp']
-			
+
 			nuevo_dispositivo = Dispositivo(nombre_produc = nombre, subtipo_disp = subtipo,destacado = False, cantidad_disp = 0,precio_disp = precio, imagen_disp = imagen,descrip_disp = descripcion, marca_disp = marca)
 			nuevo_dispositivo.save()
 			formulario = dispositivoForm()
@@ -216,8 +238,110 @@ def agregar_dispositivo(request):
 		formulario = dispositivoForm()
 	return render_to_response('agregar_dispositivo.html',{'agregarDispositivoForm':formulario,'hay_dispositivos':hay_dispositivos},context_instance = RequestContext(request))
 
+
+
+
+#######REVISAR EDITAR DISPOSITIVO!!!!!!!!!!!
+def escoger_dispositivo(request):
+	lista_dispositivo = Dispositivo.objects.all()
+	lista_subtipo = Subtipo.objects.all()
+	
+	#Si ya se escogio el producto, se genera el formulario para editar el dispositivo
+	if (request.method=='POST'):
+		dispositivo = request.POST.get('disp_elegido')
+		dispositivoEdit = Dispositivo.objects.get(id = dispositivo)
+		formulario = dispositivoForm(instance = dispositivoEdit)
+		editar_listo = True
+		ctx = {'dispositivoEdit':dispositivoEdit,'editarDispositivoForm':formulario,'editar_listo':editar_listo,'id_dispositivo':dispositivo}
+		return render_to_response('editar_dispositivo.html',ctx,context_instance = RequestContext(request))
+	else:
+		ctx = {'lista_dispositivo':lista_dispositivo,'lista_subtipo':lista_subtipo}
+		return render_to_response('escoger_dispositivo.html', ctx, context_instance = RequestContext(request))
+
+#Está malo! se tiene que corregir unas leseras
 def editar_dispositivo(request):
+	if (request.method=='POST'):
+		if formulario.is_valid():
+			dispositivo_elegido = request.POST.get('dispositivo')
+			nombre_produc_edit = formulario.cleaned_data['nombre_produc']
+			subtipo_disp_edit = formulario.cleaned_data['subtipo_disp']
+			precio_disp_edit = formulario.cleaned_data['precio_disp']
+			descrip_disp_edit = formulario.cleaned_data['descrip_disp']
+			imagen_disp_edit = formulario.cleaned_data['imagen_disp']
+			marca_disp_edit = formulario.cleaned_data['marca_disp']
+			editar_dispositivo = Dispositivo.objects.get(id = dispositivo_elegido).update(
+				nombre_produc = nombre_produc_edit,
+				destacado=destacado_edit,
+				subtipo_disp=subtipo_disp_edit,
+				cantidad_disp=cantidad_disp_edit,
+				precio_disp=precio_disp_edit,
+				marca_disp=marca_disp_edit,
+				imagen_disp=imagen_disp_edit,
+				descrip_disp=descrip_disp_edit
+				)
+			success = True
+			editar_listo = False
+			ctx = {'success':success,'editar_listo':editar_listo}
+			return render_to_response('editar_dispositivo.html',ctx,context_instance = RequestContext(request))
+		else:
+			formulario = editarDispositivoForm(request.POST, request.FILES)
+			ctx = {'editarDispositivoForm':formulario}
+			return	render_to_response('editar_dispositivo.html', ctx, context_instance = RequestContext(request))
+
+#NO FUNCIONAL
+"""
+def funcion_filtro(request):
+	resultados = json_decode(data)
+	datos_filtrados = json(resultados)
+	ctx = {'datos_filtrados':datos_filtrados}
+	return render_to_response('editar_dispositivo.html',ctx,context_instance = RequestContext(request))
+"""
+
+def agregar_caracteristica(request):
+	lista_caracteristica = Caracteristica.objects.all()
+	if request.method == 'POST':
+		formulario = caracteristicaForm(request.POST)
+		if formulario.is_valid():
+			nombre = formulario.cleaned_data['nombre_caracteristica']
+			subtipo = formulario.cleaned_data['subtipo']
+			unidad = formulario.cleaned_data['unidad']
+
+			nuevo_caracteristica = Caracteristica(subtipo = subtipo,nombre_tipo = nuevo_nombre, unidad = unidad)
+			nuevo_caracteristica.save()
+			formulario = caracteristicaForm()
+			success = True
+			ctx = {'success':success,'agregarCaracteristicaForm':formulario,'lista_caracteristica':lista_caracteristica}
+			return render_to_response('agregar_caracteristica.html',ctx, context_instance = RequestContext(request))
+	else:
+		formulario = caracteristicaForm() 
+	ctx = {'agregarCaracteristicaForm':formulario, 'lista_caracteristica':lista_caracteristica}
+	return render_to_response('agregar_caracteristica.html',ctx,context_instance = RequestContext(request))
+
+def eliminar_dispositivo(request):
+	lista_dispositivo = Dispositivo.objects.all()
+	lista_subtipo = Subtipo.objects.all()
+	if request.method == 'POST':
+		dispositivoEscogido = request.POST['disp_elegido']
+		error = False
+		eliminar_dispositivo = Dispositivo.objects.filter(id = dispositivoEscogido).delete()
+		success = True
+		ctx= {'success':success, 'lista_dispositivo':lista_dispositivo,'error':error,'lista_subtipo':lista_subtipo}
+	else:
+		ctx = {'lista_subtipo':lista_subtipo,'lista_dispositivo':lista_dispositivo}
+	return render_to_response('eliminar_dispositivo.html',ctx,context_instance = RequestContext(request))
+
+def definir_compatibilidad(request):
 	pass
 
-def eliminar_dispositivo():
+def definir_incompatibilidad(request):
+	pass
+
+def armar_equipo(request):
+	pass
+
+def eliminar_equipo(request):
+	pass
+
+
+def ver_servicio():
 	pass

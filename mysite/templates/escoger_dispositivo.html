@@ -5,7 +5,6 @@
     <meta name="description" content="">
     <meta name="author" content="Chipset">
     <!-- Todo el Estilo -->
-    <title>Editar Dispositivo</title>
     <link rel="shortcut icon" href="/media/img/favico.png" type='image/x-icon'>
     <link href="/media/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link href="/media/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
@@ -41,14 +40,23 @@
 
 <body>
     {% if success %} <h2>Dispositivo Editado Exitósamente!</h2>  {% endif %}
-    {% if editar_listo %}
-    <h1>Editar Dispositivo:</h1>
-        <form action="editar_dispositivo.html" method="POST" enctype="multipart/form-data">
-            {{ editarDispositivoForm.as_p}}
-            {% csrf_token %}
-            <input type="hidden" name="id_dispositivo" value="{{ id_dispositivo }}">   
-            <input type="submit" name="submit" value="Editar Dispositivo">
-        </form>
-     {% endif %}
+    <h1>Escoger dispositivo a editar:</h1>
+            <form action="." method="POST">
+                <select name="disp_elegido">
+                    <option value = "0">------------------------------</option>
+                    {% for subtipo in lista_subtipo %}
+                    <optgroup label="{{ subtipo.nombre_subtipo }}">
+                        {% for dispositivo in lista_dispositivo %}
+                            {% if dispositivo.subtipo_disp == subtipo %}
+                            <option value="{{ dispositivo.id }}">{{ dispositivo.nombre_produc }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </optgroup> 
+                    {% endfor %}
+                </select>
+                {% csrf_token %}
+                <input type="hidden" name="editar_listo" value="{{ editar_listo }}">
+                <input type="submit" name="submit" value="Escoger">
+            </form>
 </body>
 </html>
