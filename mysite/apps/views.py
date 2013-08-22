@@ -20,10 +20,194 @@ Buscarlo en "making queries"
 """
 
 def index_view(request):
-	return render_to_response('home/index.html',context_instance=RequestContext(request))
+	lista_tipo = Tipo.objects.all()
+	lista_subtipo = Subtipo.objects.all()
+	ctx = {'lista_tipo': lista_tipo, 'lista_subtipo':lista_subtipo}
+	return render_to_response('home/index.html',ctx,context_instance=RequestContext(request))
 
+
+#def _view(request):
+#    return render_to_response('home/.html',context_instance=RequestContext(request))
+
+
+################## Menu Administrador ######################
+##########------------------------------------##############
 def menuA_view(request):
-    return render_to_response('home/menuA.html',context_instance=RequestContext(request))
+	return render_to_response('home/menuA/admStock.html',context_instance = RequestContext(request))# Fin Menu Administrador
+
+def admStock_view(request):
+    return render_to_response('home/menuA/admStock.html',context_instance=RequestContext(request))
+
+#### Dispositivos-------------------------------------
+def admDispositivos_view(request):
+    return render_to_response('home/menuA/admDispositivos/index.html',context_instance=RequestContext(request))
+
+def agDispositivo_view(request):# Agregar Dispositivo
+    return render_to_response('home/menuA/admDispositivos/agDispositivo.html',context_instance=RequestContext(request))
+
+def elDispositivo_view(request):# Eliminar Dispositivo
+    return render_to_response('home/menuA/admDispositivos/elDispositivo.html',context_instance=RequestContext(request))
+
+def edDispositivo_view(request):# Editar Dispositivo
+    return render_to_response('home/menuA/admDispositivos/edDispositivo.html',context_instance=RequestContext(request))
+
+#### Equipos Armados-------------------------------------
+def admEArmados_view(request):
+    return render_to_response('home/menuA/admEArmados/index.html',context_instance=RequestContext(request))
+
+def agEquipo_view(request):# Agregar Equipo
+    return render_to_response('home/menuA/admEArmados/agEquipo.html',context_instance=RequestContext(request))
+
+def elEquipo_view(request):# Eliminar Equipo
+    return render_to_response('home/menuA/admEArmados/elEquipo.html',context_instance=RequestContext(request))
+
+def edEquipo_view(request):# Editar Equipo
+    return render_to_response('home/menuA/admEArmados/edEquipo.html',context_instance=RequestContext(request))
+
+#### Servicios Técnicos------------------------------------------
+def admSTecnicos_view(request):
+    return render_to_response('home/menuA/admSTecnicos/index.html',context_instance=RequestContext(request))
+
+def agSTecnico_view(request):# Agregar STecnico
+    return render_to_response('home/menuA/admSTecnicos/agSTecnico.html',context_instance=RequestContext(request))
+
+def elSTecnico_view(request):# Eliminar STecnico
+    return render_to_response('home/menuA/admSTecnicos/elSTecnico.html',context_instance=RequestContext(request))
+
+def edSTecnico_view(request):# Editar STecnico
+    return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',context_instance=RequestContext(request))
+
+#### Compatibilidades------------------------------------------
+def admCompatibilidades_view(request):
+    return render_to_response('home/menuA/admCompatibilidades/index.html',context_instance=RequestContext(request))
+
+def agCompatibilidad_view(request):# Agregar Compatibilidad
+    return render_to_response('home/menuA/admCompatibilidades/agCompatibilidad.html',context_instance=RequestContext(request))
+
+def elCompatibilidad_view(request):# Eliminar Compatibilidad
+    return render_to_response('home/menuA/admCompatibilidades/elCompatibilidad.html',context_instance=RequestContext(request))
+
+def edCompatibilidad_view(request):# Editar Compatibilidad
+    return render_to_response('home/menuA/admCompatibilidades/edCompatibilidad.html',context_instance=RequestContext(request))
+
+#### Tipos y Subtipos-------------------------------------
+def admTySubtipos_view(request):
+    return render_to_response('home/menuA/admTySubtipos/index.html',context_instance=RequestContext(request))
+
+def agTipo_view(request):# Agregar Tipo
+	global lista_tipos
+	lista_tipos = Tipo.objects.all()
+	if request.method == 'POST':
+		formulario = tipoForm(request.POST)
+		if formulario.is_valid():
+			success = True
+			nuevo_nombre = formulario.cleaned_data['nombre_tipo']
+			nuevo_tipo = Tipo(nombre_tipo = nuevo_nombre)
+			nuevo_tipo.save()
+			nuevo_tipo_form = tipoForm()
+			ctx = {'success':success,'agregarTipoForm':nuevo_tipo_form}
+			return render_to_response('home/menuA/admTySubtipos/agTipo.html',ctx, context_instance = RequestContext(request))
+		else:
+			formulario = tipoForm()
+			failure=True
+			ctx={'agregarTipoForm':formulario,'failure':failure}
+			return render_to_response('home/menuA/admTySubtipos/agTipo.html',ctx, context_instance = RequestContext(request))
+	else:
+		formulario = tipoForm()
+		ctx={'agregarTipoForm':formulario}
+		return render_to_response('home/menuA/admTySubtipos/agTipo.html',ctx, context_instance = RequestContext(request))
+
+def edTipo_view(request):# Editar Tipo
+	lista_tipos = Tipo.objects.all()
+	if request.method == 'POST':
+		formulario = tipoForm(request.POST)
+		if formulario.is_valid():
+			nuevo_nombre_tipo = formulario.cleaned_data['nombre_tipo']
+			tipoEscogido = request.POST['tipo']
+			if tipoEscogido == "VACIO":
+				success = False
+				failure = True
+			else:
+				success = True
+				failure = False
+				editar_tipo = Tipo.objects.filter(nombre_tipo = tipoEscogido).update(nombre_tipo = nuevo_nombre_tipo)
+				#editar_tipo.save()
+				formulario = tipoForm()
+			ctx = {'success': success,'failure':failure,'editarTipoForm':formulario,'lista_tipos':lista_tipos}
+			return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx,context_instance = RequestContext(request))
+		else:
+			formulario = tipoForm()
+			failure=True
+			ctx={'editarTipoForm':formulario,'failure':failure,'lista_tipos':lista_tipos}
+			return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx,context_instance = RequestContext(request))
+
+	else:
+		formulario = tipoForm()
+		ctx = {'editarTipoForm':formulario,'lista_tipos':lista_tipos}
+		return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx, context_instance = RequestContext(request))
+
+def elTipo_view(request):# Eliminar Tipo
+	lista_tipos = Tipo.objects.all()
+	if request.method == 'POST':
+		tipoEscogido = request.POST['tipo']
+		if tipoEscogido == "VACIO":
+			failure = True
+			success = False
+		else:
+			failure = False
+			eliminar_tipo = Tipo.objects.filter(id = tipoEscogido).delete()
+			success = True
+		ctx= {'success':success, 'lista_tipos':lista_tipos,'failure':failure}
+		return render_to_response('home/menuA/admTySubtipos/elTipo.html',ctx, context_instance = RequestContext(request))
+	else:
+		ctx = {'lista_tipos':lista_tipos}
+		return render_to_response('home/menuA/admTySubtipos/elTipo.html',ctx,context_instance = RequestContext(request))
+
+def agSTipo_view(request):# Agregar Subtipo
+    return render_to_response('home/menuA/admTySubtipos/agSTipo.html',context_instance=RequestContext(request))
+
+def elSTipo_view(request):# Eliminar Subtipo
+    return render_to_response('home/menuA/admTySubtipos/elSTipo.html',context_instance=RequestContext(request))
+
+def edSTipo_view(request):# Editar Subtipo
+    return render_to_response('home/menuA/admTySubtipos/edSTipo.html',context_instance=RequestContext(request))
+
+#### Empleados---------------------------------------
+def admEmpleados_view(request):
+    return render_to_response('home/menuA/admEmpleados/index.html',context_instance=RequestContext(request))
+
+def agEmpleado_view(request):# Agregar Empleado
+    return render_to_response('home/menuA/admEmpleados/agEmpleado.html',context_instance=RequestContext(request))
+
+def elEmpleado_view(request):# Editar Empleado
+    return render_to_response('home/menuA/admEmpleados/elEmpleado.html',context_instance=RequestContext(request))
+
+def edEmpleado_view(request):# Eliminar Empleado
+    return render_to_response('home/menuA/admEmpleados/edEmpleado.html',context_instance=RequestContext(request))
+
+#### Asignar Armado---------------------------------------
+def asigArmado_view(request):
+    return render_to_response('home/menuA/asigArmado/index.html',context_instance=RequestContext(request))
+
+def asigServicio_view(request):
+    return render_to_response('home/menuA/asigServicio/index.html',context_instance=RequestContext(request))
+
+def confArmado_view(request):
+    return render_to_response('home/menuA/confArmado/index.html',context_instance=RequestContext(request))
+
+def confServicio_view(request):
+    return render_to_response('home/menuA/confServicio/index.html',context_instance=RequestContext(request))
+
+def regServicio_view(request):
+    return render_to_response('home/menuA/regServicio/index.html',context_instance=RequestContext(request))
+##########------------------------------------##############
+################## Menu Administrador ######################
+
+
+
+
+
+
 
 def menuE_view(request):
     return render_to_response('home/menuE.html',context_instance=RequestContext(request))
@@ -63,7 +247,6 @@ def login(request):
 
 #Funcion que genera formulario para agregar tipo.	
 def agregar_tipo(request):
-	global lista_tipos
 	lista_tipos = Tipo.objects.all()
 	if request.method == 'POST':
 		formulario = tipoForm(request.POST)

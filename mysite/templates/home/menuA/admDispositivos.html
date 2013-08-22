@@ -1,0 +1,9 @@
+{% extends 'home/menuA.html' %}
+
+{% block aDis %}class="active"{% endblock %}
+
+{% block menuAdministrador %}
+	<h4 class="btn btn-block disabled"><i class="icon-th"></i> Administrar Dispositivos</h4><br><br>
+	{% block contenidoaDis %}
+	{% endblock %}
+{% endblock %}

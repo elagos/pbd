@@ -224,16 +224,22 @@
 
         </div><!--Barra Lateral-->
 
-        <div class="span10" style="text-align:center;">
-          {% block barraSuperior %}
-          {% endblock %}
+        <div class="span10">
 
-          <a href="{% url 'index' %}"><script type="text/javascript" language="JavaScript">printImage();</script></a>
-          <div class="pull-right">
+          <div class="span9" style="text-align:center;">
+            {% block barraSuperior %}
+            {% endblock %}
+          </div>
+
+          <div class="span3 offset3">
+            <a href="{% url 'index' %}"><script type="text/javascript" language="JavaScript">printImage();</script></a>
+          </div>
+
+          <div class="pull-right" style="text-align:center;">
             <a href=""><img src="/media/img/carrito-chico.png"><br><p class="btn btn-success">Carro de<br>Compra</p></a>
           </div>
 
-          <br><br><br>
+          <br><br><br><br>
           <div id="content" class="">
             {% block contenido %}
             {% endblock %}
@@ -278,7 +284,7 @@
         <button class="btn btn-success" type="submit">Registrar
         </button>
       </div>
-    </div>--><!--Registro-->
+    </div><!--Registro-->
     {% block modales %}
     {% endblock %}
 

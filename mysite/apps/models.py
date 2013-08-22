@@ -30,7 +30,7 @@ class Abastecimiento(models.Model):
 #Tabla de equipos armados. Hereda nombre_produc
 class EquipoArmado(Producto):
 	precio_equipo = models.IntegerField("precio")
-	imagen_equipo =  models.ImageField("imagen",upload_to = 'productos/')
+	#imagen_equipo =  models.ImageField("imagen",upload_to = 'productos/')
 
 	def __unicode__(self):
 		return u'%s %s' % (self.precio_equipo, self.nombre_produc)
@@ -63,7 +63,7 @@ class Dispositivo(Producto):
 	cantidad_disp = models.IntegerField("cantidad")
 	precio_disp = models.IntegerField("precio")
 	marca_disp = models.CharField("marca", max_length = 100)
-	imagen_disp = models.ImageField("imagen",upload_to = 'productos/',)
+	#imagen_disp = models.ImageField("imagen",upload_to = 'productos/',)
 	descrip_disp = models.TextField("descripcion")
 
 	def __unicode__(self):

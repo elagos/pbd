@@ -1,0 +1,22 @@
+{% extends 'home/menuA/admTySubtipos.html' %}
+
+{% block contenidoaTyS %}
+<ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Editar Tipo</b></a></li></ul>
+
+<form class="well" action="." method="POST">
+	{% if lista_tipos %}
+        <p>Tipo a editar:</p>
+        <select name = "tipo">
+            <option value = "VACIO">Seleccione un Tipo</option>
+            {% for tipo in lista_tipos %}
+                <option value = "{{ tipo.nombre_tipo }}">{{ tipo.nombre_tipo }}</option>
+            {% endfor %}
+        </select>
+    {% endif %}
+    {{ editarTipoForm.as_p}}
+    {% csrf_token %}
+	<input type="submit" class="btn btn-success" name="submit" value="Agregar">
+</form>
+
+<a class="btn btn-warning pull-right" href="/menuA/admTySubtipos/#menu" role="button"><i class="icon-chevron-left icon-white"></i> <b>Atrás</b></a>
+{% endblock %}
