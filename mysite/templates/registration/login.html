@@ -8,7 +8,7 @@
   <li><a href="">Servicios</a><span class="divider">|</span></li>
   <li><a href="">Noticias</a><span class="divider">|</span></li>
   <li><a href="">Promociones</a><span class="divider">|</span></li>
-  <li><a href="">Faceboook</a></li>
+  <li><a href="https://www.facebook.com/pages/radal-computacion/122875447789596">Faceboook</a></li>
 </div>
 {% endblock %}
 
@@ -17,17 +17,18 @@
 <span id="menu" class="span9"><h2 style="text-align:center;">Ingresar</h2></span><br><br><br><br><br><br>
 
   {% if form.errors %}
-    <p class="error">Sorry, that's not a valid username or password</p>
+  <div class="alert alert-danger">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <strong><i class="icon-warning-sign"></i> Login no válido!</strong> La combinación usuario/contraseña ingresada no es correcta.
+  </div>
   {% endif %}
 
-  <form action="" method="post">
-    <label for="username">User name:</label>
-    <input type="text" name="username" value="" id="username">
-    <label for="password">Password:</label>
-    <input type="password" name="password" value="" id="password">
-
-    <input type="submit" value="login" />
-    <input type="hidden" name="next" value="{{ next|escape }}" />
+  <form class="offset3" action="" method="post">
+    <input type="text" name="username" placeholder="Usuario" id="username"><br>
+    <input type="password" name="password" placeholder="Contraseña" id="password"><br>
+    {% csrf_token %}
+    <input type="submit" class="btn btn-success" style="font-weight:bold;" value="login"/><br>
+    <input type="hidden" name="next" value="{{ next|escape }}"/>
   </form>
 
 {% endblock %}

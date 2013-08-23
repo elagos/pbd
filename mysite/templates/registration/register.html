@@ -1,0 +1,34 @@
+{% extends "template.html" %}
+
+{% block title %} Registro | Chipset Management {% endblock %}
+
+{% block barraSuperior %}
+<div class="breadcrumb" style="background-color:white;">
+  <li><a href="{% url 'index' %}">Home</a><span class="divider">|</span></li>
+  <li><a href="">Servicios</a><span class="divider">|</span></li>
+  <li><a href="">Noticias</a><span class="divider">|</span></li>
+  <li><a href="">Promociones</a><span class="divider">|</span></li>
+  <li><a href="https://www.facebook.com/pages/radal-computacion/122875447789596">Faceboook</a></li>
+</div>
+{% endblock %}
+
+{% block contenido %}
+
+<span id="menu" class="span9"><h2 style="text-align:center;">Registro</h2></span><br><br><br><br><br><br>
+
+  {% if failure %}
+  <div class="alert alert-danger">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <strong><i class="icon-warning-sign"></i> No se ha creado la cuenta</strong> Ingrese los datos siguiendo las instrucciones.
+  </div>
+  {% endif %}
+
+  <form action="" method="post">
+    <table class="table table-bordered">
+      {{ form }}
+      {% csrf_token %}
+    </table>
+    <input type="submit" class="btn btn-success" style="font-weight:bold;" value="Crear cuenta">
+  </form>
+
+{% endblock %}

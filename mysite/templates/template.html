@@ -30,7 +30,7 @@
 
     <noscript>
       <div class="alert alert-danger">
-        Es necesario tener Javascript activado para utilizar todas las funciones de este sitio.
+        <strong><i class="icon-warning-sign"></i> Atención!</strong> Es necesario tener Javascript activado para utilizar todas las funciones de este sitio.
       </div>
     </noscript>
 
@@ -41,10 +41,13 @@
             <form>
               <fieldset>
                 <legend>Login</legend>
-                <input class="span12" type="text" placeholder="Usuario">
-                <input class="span12" type="password" placeholder="Clave">
-                <input type="submit" class="btn btn-primary" value="Ingreso">
-                <a class="btn btn-info" href="#registro" role="button" data-toggle="modal">Registro</a>
+                <p><a class="btn btn-primary" href="/login/" role="button"><b>Ingresar</b></a></p>
+                {% if user.is_authenticated %}
+                  <p><a class="btn btn-danger" href="/logout/" role="button"><b>Cerrar Sesión</b></a></p>
+                {% else %}
+                  <p><a class="btn btn-info" href="/registro/" role="button"><b>Registrarse</b></a></p>
+                  {% endif %}
+
               </fieldset>
             </form>
           </div><!--Login-->
