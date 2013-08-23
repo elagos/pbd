@@ -1,0 +1,33 @@
+{% extends "template.html" %}
+
+{% block title %} Login | Chipset Management {% endblock %}
+
+{% block barraSuperior %}
+<div class="breadcrumb" style="background-color:white;">
+  <li><a href="{% url 'index' %}">Home</a><span class="divider">|</span></li>
+  <li><a href="">Servicios</a><span class="divider">|</span></li>
+  <li><a href="">Noticias</a><span class="divider">|</span></li>
+  <li><a href="">Promociones</a><span class="divider">|</span></li>
+  <li><a href="">Faceboook</a></li>
+</div>
+{% endblock %}
+
+{% block contenido %}
+
+<span id="menu" class="span9"><h2 style="text-align:center;">Ingresar</h2></span><br><br><br><br><br><br>
+
+  {% if form.errors %}
+    <p class="error">Sorry, that's not a valid username or password</p>
+  {% endif %}
+
+  <form action="" method="post">
+    <label for="username">User name:</label>
+    <input type="text" name="username" value="" id="username">
+    <label for="password">Password:</label>
+    <input type="password" name="password" value="" id="password">
+
+    <input type="submit" value="login" />
+    <input type="hidden" name="next" value="{{ next|escape }}" />
+  </form>
+
+{% endblock %}

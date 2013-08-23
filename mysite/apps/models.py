@@ -17,19 +17,17 @@ class Producto(models.Model):
 	def __unicode__(self):
 		return self.nombre_produc
 
-#OJOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO FALTA VALIDAR QUE CANTIDAD SEA POSITIVA!!!
-#Tabla de los abastecimientos de productos
 class Abastecimiento(models.Model):
 	producto_abast = models.ForeignKey(Producto, related_name = 'abast_producto', verbose_name = "Producto a ingresar")
-	cant_abast = models.IntegerField("cantidad") 
+	cant_abast = models.PositiveIntegerField("cantidad") 
 	fecha = models.DateTimeField("fecha")
 
 	def __unicode__(self):
-		return u'%s %s %s' % (self.cant_abast, self.fecha, self.producto_abast)
+		return u'%s' % (self.producto_abast)
 
 #Tabla de equipos armados. Hereda nombre_produc
 class EquipoArmado(Producto):
-	precio_equipo = models.IntegerField("precio")
+	precio_equipo = models.PositiveIntegerField("precio")
 	#imagen_equipo =  models.ImageField("imagen",upload_to = 'productos/')
 
 	def __unicode__(self):
@@ -42,12 +40,12 @@ class Tipo(models.Model):
 		return self.nombre_tipo
 
 class Subtipo(models.Model):
-	tipo = models.ForeignKey(Tipo, verbose_name = "Nombre tipo al que pertenece")
-	sub_subtipo = models.ForeignKey('self',null = True, blank = True, verbose_name = "Sub-subtipo. Deje en blanco si no pertenece a ningun subtipo")
+	tipo_padre= models.ForeignKey(Tipo,null = True, blank = True, verbose_name = "Tipo padre")
+	subtipo_padre = models.ForeignKey('self',null = True, blank = True, verbose_name = "Subtipo padre")
 	nombre_subtipo = models.CharField("nombre subtipo",max_length = 100,blank = False)
 
 	def __unicode__(self):
-		return self.nombre_subtipo
+		return u'%s' % (self.nombre_subtipo)
 
 class Caracteristica(models.Model):
 	subtipo = models.ForeignKey(Subtipo)
@@ -55,46 +53,51 @@ class Caracteristica(models.Model):
 	unidad = models.CharField("unidad de medida", max_length= 50, blank = True)
 
 	def __unicode__(self):
-		return u'%s %s' % (self.nombre_caracteristica, self.unidad)
+		return u'%s' % (self.nombre_caracteristica)
 
-#Hereda nombre_produc
 class Dispositivo(Producto):
 	subtipo_disp = models.ForeignKey(Subtipo, verbose_name="Subtipo")
-	cantidad_disp = models.IntegerField("cantidad")
-	precio_disp = models.IntegerField("precio")
+	cantidad_disp = models.PositiveIntegerField("cantidad")
+	precio_disp = models.PositiveIntegerField("precio")
 	marca_disp = models.CharField("marca", max_length = 100)
 	#imagen_disp = models.ImageField("imagen",upload_to = 'productos/',)
 	descrip_disp = models.TextField("descripcion")
 
 	def __unicode__(self):
-		return u'%s %s %s %s %s' % (self.cantidad_disp,self.precio_disp,self.descrip_disp,self.nombre_produc, self.imagen_disp)
+		return u'%s' % (self.nombre_produc)
 
 class DetalleCaracteristica(models.Model):
 	caracteristica = models.ForeignKey(Caracteristica, verbose_name = "Caracteristica")
 	dispositivo = models.ForeignKey(Dispositivo, verbose_name = "Dispositivo")
-	medida = models.IntegerField("valor")
+	medida = models.PositiveIntegerField("valor")
 
-#Tabla intermedia entre EquipoArmado y Dispositivos
 class DetalleEquipo(models.Model):
 	dispositivo = models.ForeignKey(Dispositivo)
 	equipo_armado = models.ForeignKey(EquipoArmado, unique = True)
-	cantidad_equipo = models.IntegerField("cantidad")
+	cantidad_equipo = models.PositiveIntegerField("cantidad")
 
-class Incompat(models.Model):
-	producto1 = models.ForeignKey(Dispositivo, related_name = 'produc_incomp_1')
-	producto2 = models.ForeignKey(Dispositivo, related_name = 'produc_incomp_2')
+class Incompatibilidad(models.Model):
+	dispositivo1 = models.ForeignKey(Dispositivo, related_name = 'produc_incomp_1')
+	dispositivo2 = models.ForeignKey(Dispositivo, related_name = 'produc_incomp_2')
 
-class Compat(models.Model):
-	producto1 = models.ForeignKey(Dispositivo, related_name = 'produc_comp_1')
-	producto2 = models.ForeignKey(Dispositivo, related_name = 'produc_comp_2')
+	def __unicode__(self):
+		return u'%s %s' % (self.dispositivo1, self.dispositivo2)
+
+
+class Compatibilidad(models.Model):
+	dispositivo = models.ForeignKey(Dispositivo, related_name = 'dispositivo_compatible')
+	subtipo = models.ForeignKey(Subtipo, related_name = 'subtipo_compatible')
+
+	def __unicode__(self):
+		return u'%s %s' % (self.dispositivo, self.subtipo)
 
 """
 #Tabla servicio tecnico
-class ServicioTecnico(Producto):
-	producto_serv = models.ForeignKey(Producto, unique = True, related_name = 'servicio_producto')
+class ServicioTecnico(models.Model):
+	nombre_serv = models.CharField("nombre", max_length = 200)
 	precio_serv = models.IntegerField()
 	descrip_serv = models.TextField()
 
 	def __unicode__(self):
-		return u'%s %s' % (self.precio_serv, self.descrip_serv)
+		return u'%s' % (self.nombre_serv)
 """	

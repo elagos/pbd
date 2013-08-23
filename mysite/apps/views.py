@@ -13,6 +13,7 @@ from django.contrib.auth.models import User,Group
 from django.core.urlresolvers import reverse
 from mysite.apps.models import *
 from mysite.apps.forms import *
+from cart import Cart
 
 """
 Para cambiar tambien objetos relacionados, como nombre subtipos, se debe usar select_related()
@@ -30,6 +31,39 @@ def index_view(request):
 #    return render_to_response('home/.html',context_instance=RequestContext(request))
 
 
+####################### Carrito ############################
+##########------------------------------------##############
+def formularioCarrito_view(request):
+	if request.method == 'POST':
+		num = int(request.POST['numero'])
+		num1 = addCarrito(num)
+		success = True
+		ctx = {'success':success,'resultado':num1}
+		return render_to_response('home/formularioCarrito.html',ctx,context_instance = RequestContext(request))# Fin Menu Administrador
+	else:
+		return render_to_response('home/formularioCarrito.html',context_instance = RequestContext(request))# Fin Menu Administrador
+
+def addCarrito(numerito):
+	numerito +=1
+	return numerito
+
+def add_to_cart(request, product_id, quantity):
+    product = Producto.objects.get(id=product_id)
+    cart = Cart(request)
+    cart.add(product, product.unit_price, quantity)
+
+def remove_from_cart(request, product_id):
+    product = Producto.objects.get(id=product_id)
+    cart = Cart(request)
+    cart.remove(product)
+
+def carrito_view(request):
+    return render_to_response('home/cart.html', dict(cart=Cart(request)))
+##########------------------------------------##############
+####################### Carrito ############################
+
+
+
 ################## Menu Administrador ######################
 ##########------------------------------------##############
 def menuA_view(request):
@@ -43,10 +77,44 @@ def admDispositivos_view(request):
     return render_to_response('home/menuA/admDispositivos/index.html',context_instance=RequestContext(request))
 
 def agDispositivo_view(request):# Agregar Dispositivo
-    return render_to_response('home/menuA/admDispositivos/agDispositivo.html',context_instance=RequestContext(request))
+	lista_dispositivos = Dispositivo.objects.all()
+	if request.method == 'POST':
+		formulario = dispositivoForm(request.POST,request.FILES)
+		if formulario.is_valid():
+			nombre = formulario.cleaned_data['nombre_produc']
+			subtipo = formulario.cleaned_data['subtipo_disp']
+			precio = formulario.cleaned_data['precio_disp']
+			descripcion = formulario.cleaned_data['descrip_disp']
+			# imagen = formulario.cleaned_data['imagen_disp']
+			marca = formulario.cleaned_data['marca_disp']
+			nuevo_dispositivo = Dispositivo(nombre_produc = nombre, subtipo_disp = subtipo,destacado = False, cantidad_disp = 0,precio_disp = precio, descrip_disp = descripcion, marca_disp = marca)
+			nuevo_dispositivo.save()
+			formulario = dispositivoForm()
+			success = True
+			ctx = {'success':success,'agregarDispositivoForm':formulario}
+			return render_to_response('home/menuA/admDispositivos/agDispositivo.html',ctx, context_instance = RequestContext(request))
+		else:
+			formulario = dispositivoForm(request.POST)
+			failure=True
+			error="Debe rellenar apropiadamente los datos."
+			ctx={'agregarDispositivoForm':formulario,'error':error,'failure':failure}
+			return render_to_response('home/menuA/admDispositivos/agDispositivo.html',ctx, context_instance = RequestContext(request))
+	else:
+		formulario = dispositivoForm()
+		ctx={'agregarDispositivoForm':formulario}
+    	return render_to_response('home/menuA/admDispositivos/agDispositivo.html',ctx,context_instance=RequestContext(request))
 
 def elDispositivo_view(request):# Eliminar Dispositivo
-    return render_to_response('home/menuA/admDispositivos/elDispositivo.html',context_instance=RequestContext(request))
+	lista_dispositivo = Dispositivo.objects.all().order_by('nombre_produc')
+	lista_subtipo = Subtipo.objects.all()
+	if request.method == 'POST':
+		dispositivoEscogido = request.POST['disp_elegido']
+		eliminar_dispositivo = Dispositivo.objects.filter(id = dispositivoEscogido).delete()
+		success = True
+		ctx= {'success':success, 'lista_dispositivo':lista_dispositivo,'lista_subtipo':lista_subtipo}
+	else:
+		ctx = {'lista_subtipo':lista_subtipo,'lista_dispositivo':lista_dispositivo}
+    	return render_to_response('home/menuA/admDispositivos/elDispositivo.html',ctx,context_instance=RequestContext(request))
 
 def edDispositivo_view(request):# Editar Dispositivo
     return render_to_response('home/menuA/admDispositivos/edDispositivo.html',context_instance=RequestContext(request))
@@ -108,17 +176,37 @@ def agTipo_view(request):# Agregar Tipo
 			ctx = {'success':success,'agregarTipoForm':nuevo_tipo_form}
 			return render_to_response('home/menuA/admTySubtipos/agTipo.html',ctx, context_instance = RequestContext(request))
 		else:
-			formulario = tipoForm()
+			formulario = tipoForm(request.POST)
 			failure=True
-			ctx={'agregarTipoForm':formulario,'failure':failure}
+			error="Debe rellenar apropiadamente los datos."
+			ctx={'agregarTipoForm':formulario,'failure':failure,'error':error}
 			return render_to_response('home/menuA/admTySubtipos/agTipo.html',ctx, context_instance = RequestContext(request))
 	else:
 		formulario = tipoForm()
 		ctx={'agregarTipoForm':formulario}
 		return render_to_response('home/menuA/admTySubtipos/agTipo.html',ctx, context_instance = RequestContext(request))
 
+def elTipo_view(request):# Eliminar Tipo
+	lista_tipos = Tipo.objects.all().order_by('nombre_tipo')
+	if request.method == 'POST':
+		tipoEscogido = request.POST['tipo']
+		if tipoEscogido == "VACIO":
+			failure = True
+			success = False
+			error="Debe elegir el tipo a eliminar."
+		else:
+			failure = False
+			eliminar_tipo = Tipo.objects.filter(id = tipoEscogido).delete()
+			success = True
+			error="holi"
+		ctx= {'success':success, 'lista_tipos':lista_tipos,'failure':failure,'error':error}
+		return render_to_response('home/menuA/admTySubtipos/elTipo.html',ctx, context_instance = RequestContext(request))
+	else:
+		ctx = {'lista_tipos':lista_tipos}
+		return render_to_response('home/menuA/admTySubtipos/elTipo.html',ctx,context_instance = RequestContext(request))
+
 def edTipo_view(request):# Editar Tipo
-	lista_tipos = Tipo.objects.all()
+	lista_tipos = Tipo.objects.all().order_by('nombre_tipo')
 	if request.method == 'POST':
 		formulario = tipoForm(request.POST)
 		if formulario.is_valid():
@@ -127,18 +215,21 @@ def edTipo_view(request):# Editar Tipo
 			if tipoEscogido == "VACIO":
 				success = False
 				failure = True
+				error="Debe elegir el tipo a editar"
 			else:
 				success = True
 				failure = False
+				error="holi"
 				editar_tipo = Tipo.objects.filter(nombre_tipo = tipoEscogido).update(nombre_tipo = nuevo_nombre_tipo)
 				#editar_tipo.save()
-				formulario = tipoForm()
-			ctx = {'success': success,'failure':failure,'editarTipoForm':formulario,'lista_tipos':lista_tipos}
+				formulario = tipoForm(request.POST)
+			ctx = {'success': success,'failure':failure,'editarTipoForm':formulario,'lista_tipos':lista_tipos,'error':error}
 			return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx,context_instance = RequestContext(request))
 		else:
-			formulario = tipoForm()
+			formulario = tipoForm(request.POST)
 			failure=True
-			ctx={'editarTipoForm':formulario,'failure':failure,'lista_tipos':lista_tipos}
+			error="Debe rellenar apropiadamente los datos."
+			ctx={'editarTipoForm':formulario,'failure':failure,'lista_tipos':lista_tipos,'error':error}
 			return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx,context_instance = RequestContext(request))
 
 	else:
@@ -146,28 +237,72 @@ def edTipo_view(request):# Editar Tipo
 		ctx = {'editarTipoForm':formulario,'lista_tipos':lista_tipos}
 		return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx, context_instance = RequestContext(request))
 
-def elTipo_view(request):# Eliminar Tipo
-	lista_tipos = Tipo.objects.all()
-	if request.method == 'POST':
-		tipoEscogido = request.POST['tipo']
-		if tipoEscogido == "VACIO":
-			failure = True
-			success = False
-		else:
-			failure = False
-			eliminar_tipo = Tipo.objects.filter(id = tipoEscogido).delete()
-			success = True
-		ctx= {'success':success, 'lista_tipos':lista_tipos,'failure':failure}
-		return render_to_response('home/menuA/admTySubtipos/elTipo.html',ctx, context_instance = RequestContext(request))
-	else:
-		ctx = {'lista_tipos':lista_tipos}
-		return render_to_response('home/menuA/admTySubtipos/elTipo.html',ctx,context_instance = RequestContext(request))
-
 def agSTipo_view(request):# Agregar Subtipo
-    return render_to_response('home/menuA/admTySubtipos/agSTipo.html',context_instance=RequestContext(request))
+	global lista_subtipos
+	lista_tipos = Tipo.objects.all().order_by('nombre_tipo')
+	if request.method == 'POST':
+		formulario = subtipoForm(request.POST)
+		if formulario.is_valid():
+			nuevo_nombre = formulario.cleaned_data['nombre_subtipo']
+			tipo_asignado = formulario.cleaned_data['tipo_padre']
+			subtipo_asignado = formulario.cleaned_data['subtipo_padre']
+
+			if tipo_asignado or subtipo_asignado:
+				#Si se eligio Tipo y Subtipo, se lanza error
+				if tipo_asignado and subtipo_asignado:
+					failure=True
+					error = "Debe elegir un tipo o un subtipo, no ambas."
+					formulario = subtipoForm(request.POST)
+					ctx = {'failure':failure,'error':error,'agregarSubtipoForm':formulario,'lista_tipos':lista_tipos}
+					return render_to_response('home/menuA/admTySubtipos/agSTipo.html',ctx, context_instance = RequestContext(request))
+				#Se revisa si subtipo agregado pertenece a un tipo o a un subtipo
+				
+				if tipo_asignado:
+					nuevo_subtipo = Subtipo(nombre_subtipo = nuevo_nombre, tipo_padre = tipo_asignado)
+				elif subtipo_asignado:
+					nuevo_subtipo = Subtipo(nombre_subtipo = nuevo_nombre, subtipo_padre = subtipo_asignado)
+				
+				#Almacenamos en la base de datos
+				nuevo_subtipo.save()
+				formulario = subtipoForm()
+				success = True
+				ctx = {'success':success,'agregarSubtipoForm':formulario,'lista_tipos':lista_tipos}
+				return render_to_response('home/menuA/admTySubtipos/agSTipo.html',ctx, context_instance = RequestContext(request))
+			else:
+				error = "Debe elegir un tipo o un subtipo padre."
+				failure=True
+				formulario = subtipoForm(request.POST)
+				ctx = {'failure':failure,'error':error,'agregarSubtipoForm':formulario,'lista_tipos':lista_tipos}
+				return render_to_response('home/menuA/admTySubtipos/agSTipo.html',ctx, context_instance = RequestContext(request))
+		else:
+			formulario = subtipoForm(request.POST)
+			failure=True
+			error="Debe rellenar apropiadamente los datos."
+			ctx = {'failure':failure,'error':error,'agregarSubtipoForm':formulario,'lista_tipos':lista_tipos}
+			return render_to_response('home/menuA/admTySubtipos/agSTipo.html',ctx, context_instance = RequestContext(request))
+	else:
+		formulario = subtipoForm()
+		ctx ={'agregarSubtipoForm':formulario,'lista_tipos':lista_tipos}
+		return render_to_response('home/menuA/admTySubtipos/agSTipo.html',ctx,context_instance=RequestContext(request))
 
 def elSTipo_view(request):# Eliminar Subtipo
-    return render_to_response('home/menuA/admTySubtipos/elSTipo.html',context_instance=RequestContext(request))
+	lista_subtipos = Subtipo.objects.all().order_by('nombre_subtipo')
+	if request.method == 'POST':
+		subtipoEscogido = request.POST['subtipo']
+		if subtipoEscogido == "VACIO":
+			success = False
+			failure = True
+			error="Debe elegir el subtipo a eliminar"
+		else:
+			failure = False
+			error="holi"
+			eliminar_subtipo = Subtipo.objects.filter(id = subtipoEscogido).delete()
+			success = True
+		ctx= {'success':success, 'lista_subtipos':lista_subtipos,'error':error,'failure':failure}
+		return render_to_response('home/menuA/admTySubtipos/elSTipo.html',ctx, context_instance = RequestContext(request))
+	else:
+		ctx = {'lista_subtipos':lista_subtipos}
+		return render_to_response('home/menuA/admTySubtipos/elSTipo.html',ctx,context_instance=RequestContext(request))
 
 def edSTipo_view(request):# Editar Subtipo
     return render_to_response('home/menuA/admTySubtipos/edSTipo.html',context_instance=RequestContext(request))

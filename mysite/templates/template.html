@@ -29,9 +29,9 @@
     </header>
 
     <noscript>
-      <p>
+      <div class="alert alert-danger">
         Es necesario tener Javascript activado para utilizar todas las funciones de este sitio.
-      </p>
+      </div>
     </noscript>
 
     <div class="container-fluid well" style="background-color:white;border:none;">
@@ -236,7 +236,7 @@
           </div>
 
           <div class="pull-right" style="text-align:center;">
-            <a href=""><img src="/media/img/carrito-chico.png"><br><p class="btn btn-success">Carro de<br>Compra</p></a>
+            <a href="{% url 'carrito' %}"><img src="/media/img/carrito-chico.png"><br><p class="btn btn-success">Carro de<br>Compra</p></a>
           </div>
 
           <br><br><br><br>

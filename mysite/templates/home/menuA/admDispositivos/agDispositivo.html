@@ -3,7 +3,13 @@
 {% block contenidoaDis %}
 <ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Agregar Dispositivo</b></a></li></ul>
 
-<form class="well">
+<form action="." method="POST" enctype="multipart/form-data">
+	<table class="table table-bordered">
+	    {{ agregarDispositivoForm}}
+	    {% csrf_token %}
+	</table>
+	</ul>
+    <input type="submit" class="btn btn-success" name="submit" style="font-weight:bold;" value="Agregar">
 </form>
 
 <a class="btn btn-warning pull-right" href="/menuA/admDispositivos/#menu" role="button"><i class="icon-chevron-left icon-white"></i> <b>Atrás</b></a>

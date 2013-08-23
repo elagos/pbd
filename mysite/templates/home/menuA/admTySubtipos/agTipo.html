@@ -3,10 +3,12 @@
 {% block contenidoaTyS %}
 <ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Agregar Tipo</b></a></li></ul>
 
-<form class="well" action="." method="POST">
-	{{ agregarTipoForm.as_p}}
-	{% csrf_token %}
-	<input type="submit" class="btn btn-success" name="submit" value="Agregar">
+<form action="." method="POST">
+	<table class="table table-bordered">
+		{{ agregarTipoForm}}
+		{% csrf_token %}
+	</table>
+	<input type="submit" class="btn btn-success" name="submit" style="font-weight:bold;" value="Agregar">
 </form>
 
 <a class="btn btn-warning pull-right" href="/menuA/admTySubtipos/#menu" role="button"><i class="icon-chevron-left icon-white"></i> <b>Atrás</b></a>

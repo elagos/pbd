@@ -3,8 +3,20 @@
 {% block contenidoaTyS %}
 <ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Agregar Subtipo</b></a></li></ul>
 
-<form class="well">
-</form>
+{% if lista_tipos %}
+	<form action="." method="POST">
+		<table class="table table-bordered">
+			{{ agregarSubtipoForm}}
+		    {% csrf_token %}
+		</table>
+	    <input type="submit" class="btn btn-success" name="submit" style="font-weight:bold;" value="Agregar">
+	</form>
+{% else %}
+    <div class="alert alert-danger">
+	  <button type="button" class="close" data-dismiss="alert">&times;</button>
+	  <strong><i class="icon-warning-sign"></i> Atencion!</strong> Debe haber por lo menos un tipo antes de poder agregar subtipos.
+	</div>
+{% endif %}
 
 <a class="btn btn-warning pull-right" href="/menuA/admTySubtipos/#menu" role="button"><i class="icon-chevron-left icon-white"></i> <b>Atrás</b></a>
 {% endblock %}

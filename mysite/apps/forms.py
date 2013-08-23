@@ -2,6 +2,7 @@
 from django import forms
 from mysite.apps.models import *
 from datetimewidget.widgets import DateTimeWidget
+from chosen import forms as chosenforms
 
 #form registro usuario en la web
 class registroUsuario(forms.Form):
@@ -56,3 +57,8 @@ class abastecimientoForm(forms.ModelForm):
 class caracteristicaForm(forms.ModelForm):
 	class Meta:
 		model = Caracteristica
+
+
+class compatibilidadForm(forms.Form):
+	dispositivo = chosenforms.ChosenModelChoiceField(queryset = Dispositivo.objects.all())
+	subtipo = chosenforms.ChosenModelMultipleChoiceField(queryset = Subtipo.objects.all())
