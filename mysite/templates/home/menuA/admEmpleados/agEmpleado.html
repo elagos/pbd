@@ -3,7 +3,18 @@
 {% block contenidoaEmp %}
 <ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Agregar Empleado</b></a></li></ul>
 
-<form class="well">
+<form action="" method="post">
+  <table class="table table-bordered">
+    {{ form }}
+    <tr><th><label for="id_name">Nombre Completo:</label></th><td><input id="id_name" type="text" name="name"/></td></tr>
+    <tr><th><label for="id_rut">Rut:</label></th><td><input id="id_rut" type="text" name="rut"/></td></tr>
+    <tr><th><label for="id_mail">E-Mail:</label></th><td><input id="id_mail" type="text" name="mail"/></td></tr>
+	<tr><th><label for="">Es administrador:</label></th><td>
+		<label class="radio"><input type="radio" name="optionsRadios" id="id_no" value="no" checked>No</label>
+		<label class="radio"><input type="radio" name="optionsRadios" id="id_si" value="si">Sí</label></td></tr>
+    {% csrf_token %}
+  </table>
+  <input type="submit" class="btn btn-success" style="font-weight:bold;" value="Agregar">
 </form>
 
 <a class="btn btn-warning pull-right" href="/menuA/admEmpleados/#menu" role="button"><i class="icon-chevron-left icon-white"></i> <b>Atrás</b></a>

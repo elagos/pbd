@@ -16,6 +16,28 @@
 
 <span id="menu" class="span9"><h2 style="text-align:center;">Ingresar</h2></span><br><br><br><br><br><br>
 
+{% if user.is_authenticated %}
+  <div class="alert alert-danger">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <strong><i class="icon-user"></i> Ya hay una sesión iniciada!</strong> Puede cerrar esta sesión con el botón "Cerrar Sesión".
+  </div>
+  <p><a class="btn btn-primary" href="/logout/" role="button"><b>Cerrar Sesión</b></a></p>
+{% else %}
+
+  {% if next %}
+  <div class="alert alert-danger">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <strong><i class="icon-warning-sign"></i> Atención!</strong> La página que está intentando ingresar requiere que inicie sesión.
+  </div>
+  {% endif %}
+
+  {% if registro %}
+  <div class="alert alert-success">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <strong><i class="icon-warning-sign"></i> Cuenta creada!</strong> Ahora puede iniciar sesión.
+  </div>
+  {% endif %}
+
   {% if form.errors %}
   <div class="alert alert-danger">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -30,5 +52,7 @@
     <input type="submit" class="btn btn-success" style="font-weight:bold;" value="login"/><br>
     <input type="hidden" name="next" value="{{ next|escape }}"/>
   </form>
+  
+{% endif %}
 
 {% endblock %}

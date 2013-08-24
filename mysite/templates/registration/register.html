@@ -16,6 +16,13 @@
 
 <span id="menu" class="span9"><h2 style="text-align:center;">Registro</h2></span><br><br><br><br><br><br>
 
+{% if user.is_authenticated %}
+  <div class="alert alert-danger">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <strong><i class="icon-user"></i> Ya hay una sesión iniciada!</strong> Puede cerrar esta sesión con el botón "Cerrar Sesión".
+  </div>
+{% else %}
+
   {% if failure %}
   <div class="alert alert-danger">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -23,12 +30,34 @@
   </div>
   {% endif %}
 
-  <form action="" method="post">
-    <table class="table table-bordered">
-      {{ form }}
-      {% csrf_token %}
-    </table>
-    <input type="submit" class="btn btn-success" style="font-weight:bold;" value="Crear cuenta">
-  </form>
+  {% if error %}
+  <div class="alert alert-danger">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <strong><i class="icon-warning-sign"></i> Atención!</strong> {{ error }}
+  </div>
+{% endif %}
+
+  {% if registro %}
+    <div class="alert alert-success">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <strong><i class="icon-warning-sign"></i> Cuenta creada!</strong> Ahora puede iniciar sesión.
+    </div>
+    <p><a class="btn btn-primary" href="/login/" role="button"><b>Iniciar sesión</b></a></p>
+    
+  {% else %}
+
+    <form action="" method="post">
+      <table class="table table-bordered">
+        {{ form }}
+        <tr><th><label for="id_name">Nombre Completo:</label></th><td><input id="id_name" type="text" name="name"/></td></tr>
+        <tr><th><label for="id_rut">Rut:</label></th><td><input id="id_rut" type="text" name="rut"/></td></tr>
+        <tr><th><label for="id_mail">E-Mail:</label></th><td><input id="id_mail" type="text" name="mail"/></td></tr>
+        {% csrf_token %}
+      </table>
+      <input type="submit" class="btn btn-success" style="font-weight:bold;" value="Crear cuenta">
+    </form>
+  {% endif %}
+
+{% endif %}
 
 {% endblock %}

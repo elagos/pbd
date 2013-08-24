@@ -1,0 +1,33 @@
+{% extends "template.html" %}
+
+{% block title %} Perfil | Chipset Management {% endblock %}
+
+{% block barraSuperior %}
+<div class="breadcrumb" style="background-color:white;">
+  <li><a href="{% url 'index' %}">Home</a><span class="divider">|</span></li>
+  <li><a href="">Servicios</a><span class="divider">|</span></li>
+  <li><a href="">Noticias</a><span class="divider">|</span></li>
+  <li><a href="">Promociones</a><span class="divider">|</span></li>
+  <li><a href="https://www.facebook.com/pages/radal-computacion/122875447789596">Faceboook</a></li>
+</div>
+{% endblock %}
+
+{% block contenido %}
+
+<span id="menu" class="span9"><h2 style="text-align:center;">Tu Perfil</h2></span><br><br><br><br><br><br>
+
+<div class="span7 offset1">
+  <table class="table table-bordered">
+    <tr><th>Usuario:</th><td>{{ user.username }}</td></tr>
+    <tr><th>Nombre:</th><td>{{ user.first_name }}</td></tr>
+    <tr><th>Rut:</th><td>{{ user.last_name }}</td></tr>
+    <tr><th>E-mail:</th><td>{{ user.email }}</td></tr>
+    <tr><th>Rol:</th><td>{% if user.is_superuser %}Administrador{% elif user.is_staff %}Empleado{% else %}Cliente{% endif %}</td></tr>
+  </table>
+</div>
+
+<div class="span7 offset1">
+  <a class="btn btn-warning" href="/perfil/edit/#menu" role="button"><b>Editar</b></a>
+  <!-- <a class="btn btn-danger pull-right" href="/perfil/elim/#menu" role="button"><b>Eliminar Perfil</b></a> -->
+</div>
+{% endblock %}

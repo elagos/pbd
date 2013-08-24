@@ -1,0 +1,53 @@
+{% extends "template.html" %}
+
+{% block title %} Editar Perfil | Chipset Management {% endblock %}
+
+{% block barraSuperior %}
+<div class="breadcrumb" style="background-color:white;">
+  <li><a href="{% url 'index' %}">Home</a><span class="divider">|</span></li>
+  <li><a href="">Servicios</a><span class="divider">|</span></li>
+  <li><a href="">Noticias</a><span class="divider">|</span></li>
+  <li><a href="">Promociones</a><span class="divider">|</span></li>
+  <li><a href="https://www.facebook.com/pages/radal-computacion/122875447789596">Faceboook</a></li>
+</div>
+{% endblock %}
+
+{% block contenido %}
+
+<span id="menu" class="span9"><h2 style="text-align:center;">Editar Perfil</h2></span><br><br><br><br><br><br>
+
+{% if error %}
+  <div class="alert alert-danger">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <strong><i class="icon-warning-sign"></i> Atención!</strong> {{ error }}
+  </div>
+{% endif %}
+
+{% if success %}
+  <div class="alert alert-success">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <strong><i class="icon-warning-sign"></i> Cambios realizados!</strong> Sus datos han sido actualizados.
+  </div>
+{% endif %}
+
+{% if user.is_authenticated %}
+  <form action="" method="post">
+    <table class="table table-bordered">
+      <tr><th>Usuario:</th><td>{{ user.username }}</td></tr>
+      <tr><th><label for="id_pass">Contraseña:</label></th><td><input id="id_pass" type="password"  name="pass"/></td></tr>
+      <tr><th><label for="id_newpass">Nueva contraseña:</label></th><td><input id="id_newpass" type="password" name="newpass"/></td></tr>
+      <tr><th><label for="id_newpass2">Nueva contraseña (confirmación):</label></th><td><input id="id_newpass2" type="password" name="newpass2"/></td></tr>
+      <tr><th><label for="id_name">Nombre Completo:</label></th><td><input id="id_name" type="text" placeholder="{{ user.first_name }}" name="name"/></td></tr>
+      <tr><th><label for="id_rut">Rut:</label></th><td><input id="id_rut" type="text" placeholder="{{ user.last_name }}" name="rut"/></td></tr>
+      <tr><th><label for="id_mail">E-Mail:</label></th><td><input id="id_mail" type="text" placeholder="{{ user.email }}" name="mail"/></td></tr>
+      {% csrf_token %}
+    </table>
+    <input type="submit" class="btn btn-success" style="font-weight:bold;" value="Editar">
+  </form>
+  <a class="btn btn-warning pull-right" href="/perfil/#menu" role="button"><i class="icon-chevron-left icon-white"></i> <b>Atrás</b></a>
+
+
+{% else %}
+{% endif %}
+
+{% endblock %}

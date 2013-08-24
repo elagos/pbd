@@ -41,12 +41,17 @@
             <form>
               <fieldset>
                 <legend>Login</legend>
-                <p><a class="btn btn-primary" href="/login/" role="button"><b>Ingresar</b></a></p>
+
+                  <p><a class="btn btn-inverse" href="/menuA/" role="button"><b>Menú</b></a></p>
+
+                  <p><a class="btn btn-inverse" href="/menuE/" role="button"><b>Menú</b></a></p>
                 {% if user.is_authenticated %}
+                  <p><a class="btn btn-primary" href="/perfil/" role="button"><b>Perfil</b></a></p>
                   <p><a class="btn btn-danger" href="/logout/" role="button"><b>Cerrar Sesión</b></a></p>
                 {% else %}
-                  <p><a class="btn btn-info" href="/registro/" role="button"><b>Registrarse</b></a></p>
-                  {% endif %}
+                  <p><a class="btn btn-primary" href="/login/" role="button"><b>Ingresar</b></a></p>
+                  <p><a class="btn btn-info" href="/registro/#menu" role="button"><b>Registrarse</b></a></p>
+                {% endif %}
 
               </fieldset>
             </form>

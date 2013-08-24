@@ -58,7 +58,7 @@ urlpatterns = patterns('mysite.apps.views',
 #------------------------------------
 # Menu Administrador
 
-	url(r'^menue/$','menuE_view',name='menuE'),
+	url(r'^menuE/$','menuE_view',name='menuE'),
     )
 
 

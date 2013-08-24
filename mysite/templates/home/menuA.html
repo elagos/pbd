@@ -19,13 +19,13 @@
 {% if success %}
 <div class="alert alert-success">
   <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <strong><i class="icon-ok-circle"></i> Cambio Realizado!</strong> La base de datos ha sido actualizada
+  <strong><i class="icon-ok-circle"></i> Cambio Realizado!</strong> {{ success }}
 </div>
 {% endif %}
 {% if failure %}
 <div class="alert alert-danger">
   <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <strong><i class="icon-warning-sign"></i> Cambio no Realizado!</strong> {{ error }}
+  <strong><i class="icon-warning-sign"></i> Cambio no Realizado!</strong> {{ failure }}
 </div>
 {% endif %}
 

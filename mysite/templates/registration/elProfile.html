@@ -1,0 +1,40 @@
+{% extends "template.html" %}
+
+{% block title %} Eliminar Perfil | Chipset Management {% endblock %}
+
+{% block barraSuperior %}
+<div class="breadcrumb" style="background-color:white;">
+  <li><a href="{% url 'index' %}">Home</a><span class="divider">|</span></li>
+  <li><a href="">Servicios</a><span class="divider">|</span></li>
+  <li><a href="">Noticias</a><span class="divider">|</span></li>
+  <li><a href="">Promociones</a><span class="divider">|</span></li>
+  <li><a href="https://www.facebook.com/pages/radal-computacion/122875447789596">Faceboook</a></li>
+</div>
+{% endblock %}
+
+{% block contenido %}
+
+<span id="menu" class="span9"><h2 style="text-align:center;">Confirmación</h2></span><br><br><br><br><br><br>
+
+{% if success %}
+  <div class="alert alert-success">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    <strong><i class="icon-warning-sign"></i> Perfil eliminado!</strong> 
+  </div>
+
+{% else %}
+
+<div class="alert alert-danger">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <strong><i class="icon-warning-sign"></i> Eliminar Perfil</strong> ¿Está seguro que desea eliminar su perfil?
+</div>
+
+<form action="" method="post">
+  {% csrf_token %}
+  <input type="submit" class="btn btn-primary" style="font-weight:bold;" value="Eliminar">
+</form>
+<a class="btn btn-warning pull-right" href="/perfil/#menu" role="button"><i class="icon-chevron-left icon-white"></i> <b>Atrás</b></a>
+
+{% endif %}
+
+{% endblock %}
