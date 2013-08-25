@@ -1,0 +1,38 @@
+
+<select data-placeholder="Escoga dispositivos incompatibles" class="chosen-select" style="width:350px;" multiple name = "disp_incompatibles">
+    <option value="-1"></option>
+    {% for subtipo in lista_subtipo %}
+        <optgroup label="{{ subtipo.nombre_subtipo }}">
+        {% for dispositivo in lista_dispositivo %}
+            {% if dispositivo.subtipo_disp == subtipo %}
+                {% if dispositivo_anulado %}
+                <!-- Se anula el dispositivo si es el elegido, para evitar incompatibildiad con si mismo, y 
+                    se anulan también los dispositivos que ya tienen una incompatibilidad previa-->
+                    {% if dispositivo.id == dispositivo_anulado.id %}
+                        <option disabled>{{ dispositivo.nombre_produc }}</option>
+                    {% else %}
+                        {% if dispositivo.id in dispositivos_incompatibles %}
+                        <option disabled>{{ dispositivo.nombre_produc }} | Ya es Incompatible</option>
+                        {%else%}
+                        <option value = "{{ dispositivo.id }}">{{ dispositivo.nombre_produc }}</option>
+                        {% endif%}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        </optgroup> 
+     {% endfor %}
+</select>
+
+<script type="text/javascript">
+    var config = {
+      '.chosen-select'           : {},
+      '.chosen-select-deselect'  : {allow_single_deselect:true},
+      '.chosen-select-no-single' : {disable_search_threshold:10},
+      '.chosen-select-no-results': {no_results_text:'No se encontró nada!'},
+      '.chosen-select-width'     : {width:"95%"}
+    }
+    for (var selector in config) {
+      $(selector).chosen(config[selector]);
+    }
+</script>

@@ -3,8 +3,26 @@
 {% block contenidoaSTe %}
 <ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Eliminar Servicio Técnico</b></a></li></ul>
 
-<form class="well">
-</form>
+{% if lista_servicios %}
+    <form action="." method="POST">
+        <table class="table table-bordered">
+            <tr><th><label>Servicio:</label></th>
+            <td><select name = "servicio">
+                <option value = "VACIO">---------</option>
+                {% for servicio in lista_servicios %}
+                    <option value = "{{ servicio.nombre_serv }}">{{ servicio.nombre_serv }}</option>
+                {% endfor %}
+            </select></td></tr>
+            {% csrf_token %}
+        </table>
+    	<input type="submit" class="btn btn-success" name="submit" style="font-weight:bold;" value="Eliminar">
+    </form>
+{% else %}
+    <div class="alert alert-danger">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <strong><i class="icon-warning-sign"></i> Atencion!</strong> No hay servicios en la base de datos.
+    </div>
+{% endif %}
 
 <a class="btn btn-warning pull-right" href="/menuA/admSTecnicos/#menu" role="button"><i class="icon-chevron-left icon-white"></i> <b>Atrás</b></a>
 {% endblock %}

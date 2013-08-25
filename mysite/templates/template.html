@@ -10,6 +10,7 @@
     <link rel="shortcut icon" href="/media/img/favico.png" type='image/x-icon'>
     <link href="/media/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link href="/media/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" href="/media/chosen/chosen.css">
     <script type="text/javascript" language="JavaScript">
     NumberOfImagesToRotate = 6;
     FirstPart = '<img src="/media/img/logo';
@@ -263,41 +264,5 @@
     <footer class="btn btn-primary btn-block disabled">
         <p>&copy; 2013 Radal Computación, Ltda. &middot; <a style="color:white" href="">Privacidad</a> &middot; <a style="color:white;text-align:center" href="">Condiciones</a></p>
     </footer>
-
-    <div id="registro" class="modal hide fade" aria-labellledby="modalLabel" ariahidden="true">      
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
-        <h3 id="modalLabel">Registro</h3>
-      </div>      
-      <div class="modal-body">
-        <form action="#" method="post">
-        	{{ form.as_p }}
-        	{% csrf_token %}
-        </form>
-        
-        <form action="/index_view/c/" method="post">
-          <div class="controls control-group">
-            <input type="text" name ="nombre" class="span5" placeholder="Nombre">
-            <input type="text" name ="rut" class="span5" placeholder="RUT">
-            <input type="text" name ="telefono" class="span5" placeholder="Teléfono">
-            <input type="text" name ="email" class="span5" placeholder="Email">
-            <input type="password" name ="pass1" class="span5" placeholder="Clave">
-            <input type="password" name ="pass2" class="span5" placeholder="Confirmar Clave">
-          </div>
-        </form>
-      </div>      
-      <div class="modal-footer">
-        <button class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar
-        </button>
-        <button class="btn btn-success" type="submit">Registrar
-        </button>
-      </div>
-    </div><!--Registro-->
-    {% block modales %}
-    {% endblock %}
-
-
-    <script src="http://code.jquery.com/jquery.js"></script>
-    <script src="/media/js/bootstrap.min.js"></script>
   </body>
 </html>

@@ -3,7 +3,12 @@
 {% block contenidoaSTe %}
 <ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Agregar Servicio Técnico</b></a></li></ul>
 
-<form class="well">
+<form action="." method="POST">
+	<table class="table table-bordered">
+		{{ agregarServicioForm}}
+		{% csrf_token %}
+	</table>
+	<input type="submit" class="btn btn-success" name="submit" style="font-weight:bold;" value="Agregar">
 </form>
 
 <a class="btn btn-warning pull-right" href="/menuA/admSTecnicos/#menu" role="button"><i class="icon-chevron-left icon-white"></i> <b>Atrás</b></a>

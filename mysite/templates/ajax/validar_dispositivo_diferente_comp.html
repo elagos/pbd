@@ -1,0 +1,57 @@
+<select data-placeholder="Escoga uno o más subtipos" class="chosen-select" multiple style="width:350px;" name="subtipo_escogido">
+    <option value="-1"></option>
+    {% for subtipo in lista_subtipo %}
+	       {% if subtipo.id in lista_subtipos_compatibles %}
+	    	<option disabled>{{ subtipo.nombre_subtipo}} | Ya es compatible</option>
+	        {% else %}
+	    	<option value="{{ subtipo.id }}">{{ subtipo.nombre_subtipo}}</option>
+            {% endif %}
+    {% endfor %}
+</select>
+
+<script type="text/javascript">
+$('#id-dispositivo').on('change', function(){
+
+        // Se obtiene el id del dipositivo
+        var id_disp = $('#id-dispositivo').val();
+        
+        if (id_disp != '-1') {
+            
+            // Se realiza la petición ajax
+            $.ajax({
+                async:true,
+                type:'post',
+                url: '/ajax/validar_dispositivo_diferente_comp/',
+                data: 'id=' + id_disp,
+                beforeSend:function(){
+                    //$('#loading').fadeIn(100);
+                },
+                success:function(respuesta){
+                    $('#box-subtipo').html(respuesta);
+                    for (var selector in config) {
+                      $(selector).chosen(config[selector]);
+                    }
+                    //$('#loading').fadeOut(200);
+                },
+                timeout:8000,
+                error:function( jqXHR, textStatus, errorThrown ){
+                    //$('#loading').fadeOut(200);
+                    alert('Ha ocurrido un error, por favor inténtalo nuevamente.');
+                    //alert('Ha ocurrido un error:\n' + jqXHR + '\n' + textStatus + '\n' + errorThrown);
+                }
+            });
+        }
+    });
+
+
+    var config = {
+      '.chosen-select'           : {},
+      '.chosen-select-deselect'  : {allow_single_deselect:true},
+      '.chosen-select-no-single' : {disable_search_threshold:10},
+      '.chosen-select-no-results': {no_results_text:'No se encontró nada!'},
+      '.chosen-select-width'     : {width:"95%"}
+    }
+    for (var selector in config) {
+      $(selector).chosen(config[selector]);
+    }
+</script>

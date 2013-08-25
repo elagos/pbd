@@ -35,7 +35,8 @@ urlpatterns = patterns('mysite.apps.views',
     url(r'^menuA/admCompatibilidades/$','admCompatibilidades_view',name='admCompatibilidades'),
     url(r'^menuA/admCompatibilidades/agCompatibilidad/$','agCompatibilidad_view',name='agCompatibilidad'),
     url(r'^menuA/admCompatibilidades/elCompatibilidad/$','elCompatibilidad_view',name='elCompatibilidad'),
-    url(r'^menuA/admCompatibilidades/edCompatibilidad/$','edCompatibilidad_view',name='edCompatibilidad'),
+    url(r'^menuA/admCompatibilidades/agIncompatibilidad/$','agIncompatibilidad_view',name='agIncompatibilidad'),
+    url(r'^menuA/admCompatibilidades/elIncompatibilidad/$','elIncompatibilidad_view',name='elIncompatibilidad'),
 
     url(r'^menuA/admTySubtipos/$','admTySubtipos_view',name='admTySubtipos'),
     url(r'^menuA/admTySubtipos/agTipo/$','agTipo_view',name='agTipo'),
@@ -57,6 +58,17 @@ urlpatterns = patterns('mysite.apps.views',
     url(r'^menuA/regServicio/$','regServicio_view',name='regServicio'),
 #------------------------------------
 # Menu Administrador
+
+    # AJAX
+    url(r'^ajax/validar_dispositivo_diferente/$','ajax_validar_disp_diferente',name='ajax validar disp diferente'),
+    url(r'^ajax/validar_dispositivo_diferente_comp/$','ajax_validar_disp_diferente_comp',name='ajax validar disp diferente'),
+    # url(r'^ajax/escoger_subtipo/$','ajax_escoger_subtipo',name='escoger subtipo'),
+    # url(r'^ajax/escoger_subtipo2/$','ajax_escoger_subtipo2',name='escoger subtipo2'),
+    # url(r'^ajax/escoger_dispositivo/$','ajax_escoger_dispositivo',name='escoger dispositivo'),
+    url(r'^ajax/activar_input/$','ajax_activar_input',name='activar_input'),
+    url(r'^ajax/listar_compatibilidad/$','ajax_listar_compatibilidad',name='ajax listar compat'),
+    url(r'^ajax/listar_incompatibilidad/$','ajax_listar_incompatibilidad',name='ajax listar incompat'),
+    url(r'^ajax/editar_servicio/$','ajax_editar_servicio',name='ajax editar servicio'),
 
 	url(r'^menuE/$','menuE_view',name='menuE'),
     )

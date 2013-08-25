@@ -28,7 +28,7 @@ class Abastecimiento(models.Model):
 #Tabla de equipos armados. Hereda nombre_produc
 class EquipoArmado(Producto):
 	precio_equipo = models.PositiveIntegerField("precio")
-	#imagen_equipo =  models.ImageField("imagen",upload_to = 'productos/')
+	imagen_equipo =  models.ImageField("imagen",upload_to = 'productos/')
 
 	def __unicode__(self):
 		return u'%s %s' % (self.precio_equipo, self.nombre_produc)
@@ -60,7 +60,7 @@ class Dispositivo(Producto):
 	cantidad_disp = models.PositiveIntegerField("cantidad")
 	precio_disp = models.PositiveIntegerField("precio")
 	marca_disp = models.CharField("marca", max_length = 100)
-	#imagen_disp = models.ImageField("imagen",upload_to = 'productos/',)
+	imagen_disp = models.ImageField("imagen",upload_to = 'productos/',)
 	descrip_disp = models.TextField("descripcion")
 
 	def __unicode__(self):
@@ -83,7 +83,6 @@ class Incompatibilidad(models.Model):
 	def __unicode__(self):
 		return u'%s %s' % (self.dispositivo1, self.dispositivo2)
 
-
 class Compatibilidad(models.Model):
 	dispositivo = models.ForeignKey(Dispositivo, related_name = 'dispositivo_compatible')
 	subtipo = models.ForeignKey(Subtipo, related_name = 'subtipo_compatible')
@@ -91,13 +90,12 @@ class Compatibilidad(models.Model):
 	def __unicode__(self):
 		return u'%s %s' % (self.dispositivo, self.subtipo)
 
-"""
+
 #Tabla servicio tecnico
 class ServicioTecnico(models.Model):
 	nombre_serv = models.CharField("nombre", max_length = 200)
-	precio_serv = models.IntegerField()
-	descrip_serv = models.TextField()
+	precio_serv = models.PositiveIntegerField("precio servicio")
+	descrip_serv = models.TextField("descripcion")
 
 	def __unicode__(self):
 		return u'%s' % (self.nombre_serv)
-"""	

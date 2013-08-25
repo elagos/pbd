@@ -1,0 +1,124 @@
+{% if not vacio %}
+	<select id="id-subtipo" data-placeholder="Escoga subtipo" data-level={{ nivel }} class="chosen-select id-subtipo" style="width:250px;" name = "tipo_escogido">
+		<option value="-1"></option>
+		{% for subtipo in lista_subtipo %}
+		<option value="{{ subtipo.id }}">{{ subtipo.nombre_subtipo }}</option>
+		{% endfor %}
+	</select><br><br>
+
+
+<script type="text/javascript">
+
+	$('.id-subtipo').on('change',function(){
+		var self = this
+		//var nivel = $(this).attr('data-level');
+		var id_subtipo = $('#id-subtipo').val();
+		var data_level = $(this).attr('data-level');
+		var id_subtipo = $(this).val();
+
+		// $('#id-subtipo').each(function(index) {
+		//     var numero = index+data_level+1;
+		//     $('#id-subtipo[data_level='+numero+']').remove();
+		// });
+
+		if (id_subtipo != '-1') {
+
+			// Se realiza la petición ajax
+			$.ajax({
+				async:true,
+				type:'post',
+				url: '/ajax/escoger_subtipo2/',
+				data: 'id=' + id_subtipo + '&nivel=' + data_level,
+				beforeSend:function(){
+					//$('#loading').fadeIn(100);
+				},
+				success:function(respuesta){
+					var html = $('#truco').html();
+					$('#truco').append(respuesta);
+					for (var selector in config) {
+						$(selector).chosen(config[selector]);
+
+					}
+
+				},
+				timeout:8000,
+				error:function( jqXHR, textStatus, errorThrown ){
+					//$('#loading').fadeOut(200);
+					alert('Ha ocurrido un error, por favor inténtalo nuevamente.');
+					//alert('Ha ocurrido un error al cargar el subtipo:\n' + jqXHR + '\n' + textStatus + '\n' + errorThrown);
+				}
+			});
+
+			$.ajax({
+				async:true,
+				type:'post',
+				url: '/ajax/escoger_dispositivo/',
+				data: 'id=' + id_subtipo,
+				beforeSend:function(){
+					//$('#loading').fadeIn(100);
+				},
+				success:function(respuesta){
+					$('#box-dispositivo').html(respuesta);
+					for (var selector in config) {
+						$(selector).chosen(config[selector]);
+					}
+					//$('#loading').fadeOut(200);
+				},
+				timeout:8000,
+				error:function( jqXHR, textStatus, errorThrown ){
+					//$('#loading').fadeOut(200);
+					//alert('Ha ocurrido un error, por favor inténtalo nuevamente.');
+					alert('Ha ocurrido un error al cargar el dispositivo:\n' + jqXHR + '\n' + textStatus + '\n' + errorThrown);
+				}
+			});
+
+
+		}
+	});
+
+	// $('.id-subtipo').on('change',function(){
+
+	// 	var id_subtipo = $('.id-subtipo').val();
+
+	// 		if (id_subtipo != '-1') {
+	// 		alert('dentro del js para escoger dispositivos')
+	// 		// Se realiza la petición ajax
+	// 		$.ajax({
+	// 			async:true,
+	// 			type:'post',
+	// 			url: '/ajax/escoger_dispositivo/',
+	// 			data: 'id=' + id_subtipo,
+	// 			beforeSend:function(){
+	// 				//$('#loading').fadeIn(100);
+	// 			},
+	// 			success:function(respuesta){
+	// 				$('#box-dispositivo').html(respuesta);
+	// 				for (var selector in config) {
+	// 					$(selector).chosen(config[selector]);
+	// 				}
+	// 				//$('#loading').fadeOut(200);
+	// 			},
+	// 			timeout:8000,
+	// 			error:function( jqXHR, textStatus, errorThrown ){
+	// 				//$('#loading').fadeOut(200);
+	// 				//alert('Ha ocurrido un error, por favor inténtalo nuevamente.');
+	// 				alert('Ha ocurrido un error al cargar el dispositivo:\n' + jqXHR + '\n' + textStatus + '\n' + errorThrown);
+	// 			}
+	// 		});
+	// 	}
+	// });
+
+
+
+	var config = {
+	  '.chosen-select'           : {},
+	  '.chosen-select-deselect'  : {allow_single_deselect:true},
+	  '.chosen-select-no-single' : {disable_search_threshold:10},
+	  '.chosen-select-no-results': {no_results_text:'No se encontró nada!'},
+	  '.chosen-select-width'     : {width:"95%"}
+	}
+	for (var selector in config) {
+	  $(selector).chosen(config[selector]);
+	}
+</script>
+{% endif %}

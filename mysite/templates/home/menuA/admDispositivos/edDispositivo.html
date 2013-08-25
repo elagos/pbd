@@ -3,8 +3,34 @@
 {% block contenidoaDis %}
 <ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Editar Dispositivo</b></a></li></ul>
 
-<form class="well">
-</form>
+{% if lista %}
+    <form action="." method="POST">
+        <table class="table table-bordered">
+            {% if seleccion %}
+                <tr><th>Nombre:<input hidden name="selec" value="seleccionado"><input hidden name="name" value="{{ seleccion.nombre_serv }}"></th>
+                <td>{{ seleccion.nombre_serv }}</td></tr>
+                <tr><th><label for="id_1">Nuevo Nombre:</label></th><td><input id="id_1" type="text" placeholder="{{ seleccion.nombre_serv }}" name="newname"/></td></tr>
+                <tr><th><label for="id_2">Precio:</label></th><td><input id="id_2" type="text" placeholder="{{ seleccion.precio_serv }}" name="precio"/></td></tr>
+                <tr><th><label for="id_3">Descripción:</label></th><td><input id="id_3" type="text" placeholder="{{ seleccion.descrip_serv }}" name="descrip"/></td></tr>
+            {% else %}
+                <tr><th><label>Nombre:</label></th>
+                <td><select name = "selec">
+                    <option value = "">---------</option>
+                    {% for objeto in lista %}
+                        <option value = "{{ objeto.nombre_produc }}">{{ objeto.nombre_produc }}</option>
+                    {% endfor %}
+                </select></td></tr>
+            {% endif %}                
+            {% csrf_token %}
+        </table>
+    	<input type="submit" class="btn btn-success" name="submit" style="font-weight:bold;" value="Editar">
+    </form>
+{% else %}
+    <div class="alert alert-danger">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <strong><i class="icon-warning-sign"></i> Atencion!</strong> No hay dispositivos en la base de datos.
+    </div>
+{% endif %}
 
 <a class="btn btn-warning pull-right" href="/menuA/admDispositivos/#menu" role="button"><i class="icon-chevron-left icon-white"></i> <b>Atrás</b></a>
 {% endblock %}

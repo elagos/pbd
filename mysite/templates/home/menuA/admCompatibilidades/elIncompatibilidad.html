@@ -2,22 +2,22 @@
 
 {% block contenidoaCom %}
 
-<ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Eliminar Compatibilidad</b></a></li></ul>
+<ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Eliminar Incompatibilidad</b></a></li></ul>
 
 <form action="." method="POST">
 	<table class="table table-bordered">
 		<tr><th><label>Dispositivo:</label></th>
 		<td><div id="box-dispositivo" class="side-by-side clearfix">
-				<select id="id-dispositivo-1" data-placeholder="Escoga un dispositivo" class="chosen-select" style="width:250px;" name = "disp_compat">
+				<select id="id-dispositivo-1" data-placeholder="Escoga un dispositivo" class="chosen-select" style="width:250px;" name = "disp_elegido">
 					<option value="-1"></option>
-					{% for disp in lista_dispositivo %}
+					{% for disp in lista_dispositivo1 %}
 					<option value="{{ disp.id }}">{{ disp.nombre_produc }}</option>
 					{% endfor %}
 				</select>
 		</div></td></tr>
-		<tr><th><label>Compatible con:</label></th>
-		<td><div id ="box-subtipo" class="side-by-side clearfix">
-			<select disabled data-placeholder="Escoga Compatibilidad" class="chosen-select" style="width:250px;" name = "subtipos_compat">
+		<tr><th><label>Incompatible con:</label></th>
+		<td><div id ="box-dispositivo-2" class="side-by-side clearfix">
+			<select disabled data-placeholder="Escoja Incompatibilidad" class="chosen-select" style="width:250px;" name = "disp_incompatibles">
 			</select>
 		</div></td></tr>
 	</table>
@@ -48,13 +48,13 @@
 			$.ajax({
 				async:true,
 				type:'post',
-				url: '/ajax/listar_compatibilidad/',
+				url: '/ajax/listar_incompatibilidad/',
 				data: 'id=' + id_disp_1 ,
 				beforeSend:function(){
 					//$('#loading').fadeIn(100);
 				},
 				success:function(respuesta){
-					$('#box-subtipo').html(respuesta);
+					$('#box-dispositivo-2').html(respuesta);
 					for (var selector in config) {
 						$(selector).chosen(config[selector]);
 					}

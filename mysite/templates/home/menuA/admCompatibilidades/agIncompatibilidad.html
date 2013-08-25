@@ -2,31 +2,31 @@
 
 {% block contenidoaCom %}
 
-<ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Agregar Compatibilidad</b></a></li></ul>
+<ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Agregar Incompatibilidad</b></a></li></ul>
 
 <form action="." method="POST">
-	<table class="table table-bordered">
-		<tr><th><label>Dispositivo:</label></th>
-		<td><div id="box-disp-1" class="side-by-side clearfix">
-		        <select id = "id-dispositivo" data-placeholder="Escoga un dispositivo" class="chosen-select" style="width:350px;" name = "disp_elegido">
-		            <option value="-1"></option>
-		            {% for subtipo in lista_subtipo %}
-		                <optgroup label="{{ subtipo.nombre_subtipo }}">
-		                {% for dispositivo in lista_dispositivo %}
-		                     {% if dispositivo.subtipo_disp == subtipo %}
-		                    <option value="{{ dispositivo.id }}">{{ dispositivo.nombre_produc }}</option>
-		                    {% endif %}
-		                {% endfor %}
-		                </optgroup> 
-		             {% endfor %}
-		        </select>
-		</div></td></tr>
-		<tr><th><label>Compatible con:</label></th>
-		<td><div id = "box-subtipo" class="side-by-side clearfix">
-		  	<select disabled data-placeholder="Escoja subtipos incompatibles" class="chosen-select" style="width:250px;" name = "disp_incompatibles">
-		    </select>
-		</div></td></tr>
-	</table>
+    <table class="table table-bordered">
+        <tr><th><label>Dispositivo:</label></th>
+        <td><div id="box-disp-1" class="side-by-side clearfix">
+                <select id="id-dispositivo-1" data-placeholder="Escoga un dispositivo" class="chosen-select" style="width:250px;" name = "disp_elegido">
+                    <option value="-1"></option>
+                    {% for subtipo in lista_subtipo %}
+                        <optgroup label="{{ subtipo.nombre_subtipo }}">
+                        {% for dispositivo in lista_dispositivo %}
+                             {% if dispositivo.subtipo_disp == subtipo %}
+                            <option value="{{ dispositivo.id }}">{{ dispositivo.nombre_produc }}</option>
+                            {% endif %}
+                        {% endfor %}
+                        </optgroup> 
+                     {% endfor %}
+                </select>
+        </div></td></tr>
+        <tr><th><label>Incompatible con:</label></th>
+        <td><div id ="box-disp-2" class="side-by-side clearfix">
+            <select disabled data-placeholder="Escoja dispositivos incompatibles" class="chosen-select" style="width:250px;" name = "disp_incompatibles">
+            </select>
+        </div></td></tr>
+    </table>
     {% csrf_token %}
     <input type="submit" class="btn btn-success" name="submit" style="font-weight:bold;" value="Agregar">
 </form>
@@ -37,31 +37,29 @@
 <script src="/media/js/jquery.min.js"></script>
 <script src="/media/js/plugins.js" type="text/javascript" charset="utf-8"></script>
 <script src="/media/chosen/chosen.jquery.js" type="text/javascript"></script>
-<!-- <script src="/media/chosen/docsupport/prism.js" type="text/javascript" charset="utf-8"></script> -->
+<script src="/media/chosen/docsupport/prism.js" type="text/javascript" charset="utf-8"></script>
+
 <script type="text/javascript">
   $(document).on('ready', function() {
-
-    $('#id-dispositivo').on('change', function(){
-
+    $('#id-dispositivo-1').on('change', function(){
         // Se obtiene el id del dipositivo
-        var id_disp = $('#id-dispositivo').val();
+        var id_disp_1 = $('#id-dispositivo-1').val();
         
-        if (id_disp != '-1') {
-            
+        if (id_disp_1 != '-1') {
             // Se realiza la petición ajax
             $.ajax({
                 async:true,
                 type:'post',
-                url: '/ajax/validar_dispositivo_diferente_comp/',
-                data: 'id=' + id_disp,
+                url: '/ajax/validar_dispositivo_diferente/',
+                data: 'id=' + id_disp_1,
                 beforeSend:function(){
                     //$('#loading').fadeIn(100);
                 },
                 success:function(respuesta){
-                    $('#box-subtipo').html(respuesta);
-                    // for (var selector in config) {
-                    //   $(selector).chosen(config[selector]);
-                    // }
+                    $('#box-disp-2').html(respuesta);
+                     for (var selector in config) {
+                      $(selector).chosen(config[selector]);
+                    }
                     //$('#loading').fadeOut(200);
                 },
                 timeout:8000,

@@ -23,11 +23,11 @@ class dispositivoForm(forms.ModelForm):
 	class Meta:
 		model = Dispositivo
 		exclude = ('destacado','cantidad_disp')
-"""
+
 class servicioForm(forms.ModelForm):
 	class Meta:
 		model = ServicioTecnico
-"""
+
 class equipoForm(forms.ModelForm):
 	class Meta:
 		model = EquipoArmado

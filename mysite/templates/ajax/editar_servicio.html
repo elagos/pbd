@@ -1,0 +1,62 @@
+<div>
+    {{ editarServicioForm.as_p }}
+    {% csrf_token %}
+</div>
+
+
+
+
+
+
+
+<script type="text/javascript">
+  $(document).on('ready', function() {
+
+
+	$('#id-servicio').on('change', function(){
+
+		// Se obtiene el id del dipositivo
+		var id_serv = $('#id-servicio').val();
+		
+		if (id_serv != '-1') {
+			
+			// Se realiza la petición ajax
+			$.ajax({
+				async:true,
+				type:'post',
+				url: '/ajax/editar_servicio/',
+				data: 'id=' + id_serv ,
+				beforeSend:function(){
+					//$('#loading').fadeIn(100);
+				},
+				success:function(respuesta){
+					$('#box-editar-serv').html(respuesta);
+					for (var selector in config) {
+						$(selector).chosen(config[selector]);
+					}
+
+					//$('#loading').fadeOut(200);
+				},
+				timeout:8000,
+				error:function( jqXHR, textStatus, errorThrown ){
+					//$('#loading').fadeOut(200);
+					alert('Ha ocurrido un error, por favor inténtalo nuevamente.');
+					//alert('Ha ocurrido un error:\n' + jqXHR + '\n' + textStatus + '\n' + errorThrown);
+				}
+			});
+		}
+	});
+
+	   
+});
+	var config = {
+	  '.chosen-select'           : {},
+	  '.chosen-select-deselect'  : {allow_single_deselect:true},
+	  '.chosen-select-no-single' : {disable_search_threshold:10},
+	  '.chosen-select-no-results': {no_results_text:'No se encontró nada!'},
+	  '.chosen-select-width'     : {width:"95%"}
+	}
+	for (var selector in config) {
+	  $(selector).chosen(config[selector]);
+	}
+</script>

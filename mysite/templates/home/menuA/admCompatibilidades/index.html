@@ -1,9 +1,20 @@
 {% extends 'home/menuA/admCompatibilidades.html' %}
 
 {% block contenidoaCom %}
-<ul class="nav nav-tabs nav-stacked">
-	<li><a href="/menuA/admCompatibilidades/agCompatibilidad/#menu"><b>Agregar Compatibilidad</b></a></li>
-	<li><a href="/menuA/admCompatibilidades/elCompatibilidad/#menu"><b>Eliminar Compatibilidad</b></a></li>
-	<li><a href="/menuA/admCompatibilidades/edCompatibilidad/#menu"><b>Editar Compatibilidad</b></a></li>
-</ul>
+<div>
+	<div class="span6">
+		<ul class="nav nav-tabs nav-stacked">
+			<li class="nav-header">Compatibilidades</li>
+			<li><a href="/menuA/admCompatibilidades/agCompatibilidad/#menu"><b>Agregar Compatibilidad</b></a></li>
+			<li><a href="/menuA/admCompatibilidades/elCompatibilidad/#menu"><b>Eliminar Compatibilidad</b></a></li>
+		</ul>
+	</div>
+	<div class="span6">
+		<ul class="nav nav-tabs nav-stacked">
+			<li class="nav-header">Incompatibilidades</li>
+			<li><a href="/menuA/admCompatibilidades/agIncompatibilidad/#menu"><b>Agregar Incompatibilidad</b></a></li>
+			<li><a href="/menuA/admCompatibilidades/elIncompatibilidad/#menu"><b>Eliminar Incompatibilidad</b></a></li>
+		</ul>
+	</div>
+</div>
 {% endblock %}

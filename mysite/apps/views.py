@@ -32,6 +32,14 @@ def index_view(request):
 #def _view(request):
 #    return render_to_response('home/.html',context_instance=RequestContext(request))
 
+def getCore(request):
+	if request.method == 'GET':
+		variable = request.GET['cat']
+		ctx={'variable':variable}
+		return render_to_response('getCore.html',ctx,context_instance=RequestContext(request))
+	return render_to_response('getCore.html',context_instance=RequestContext(request))
+
+
 ###################### registro ############################
 ##########------------------------------------##############
 def digito_verificador(numRut):
@@ -50,6 +58,13 @@ def esRut(rut):
 	if rut[-2:-1] == "-":
 		return True
 	return False
+
+def esInt(numero):
+	try:
+		val = int(numero)
+	except ValueError:
+		return False
+	return True
 
 def register_view(request):
 	if request.method == 'POST':
@@ -199,10 +214,14 @@ def agDispositivo_view(request):# Agregar Dispositivo
 		formulario = dispositivoForm(request.POST,request.FILES)
 		if formulario.is_valid():
 			nombre = formulario.cleaned_data['nombre_produc']
+			if Dispositivo.objects.filter(nombre_produc=nombre):
+				failure="Ya existe un dispositivo con el nombre ingresado."
+				ctx={'agregarDispositivoForm':formulario,'failure':failure}
+				return render_to_response('home/menuA/admDispositivos/agDispositivo.html',ctx, context_instance = RequestContext(request))
 			subtipo = formulario.cleaned_data['subtipo_disp']
 			precio = formulario.cleaned_data['precio_disp']
 			descripcion = formulario.cleaned_data['descrip_disp']
-			# imagen = formulario.cleaned_data['imagen_disp']
+			imagen = formulario.cleaned_data['imagen_disp']
 			marca = formulario.cleaned_data['marca_disp']
 			nuevo_dispositivo = Dispositivo(nombre_produc = nombre, subtipo_disp = subtipo,destacado = False, cantidad_disp = 0,precio_disp = precio, descrip_disp = descripcion, marca_disp = marca)
 			nuevo_dispositivo.save()
@@ -233,7 +252,48 @@ def elDispositivo_view(request):# Eliminar Dispositivo
 		return render_to_response('home/menuA/admDispositivos/elDispositivo.html',ctx,context_instance=RequestContext(request))
 
 def edDispositivo_view(request):# Editar Dispositivo
-	return render_to_response('home/menuA/admDispositivos/edDispositivo.html',context_instance=RequestContext(request))
+	lista = Dispositivo.objects.all().order_by('nombre_produc')
+	if request.method == 'POST':
+		seleccion = request.POST['selec']
+		if seleccion == "":
+			success = False
+			failure = "Debe elegir el dispositivo a editar."
+			ctx = {'lista':lista,'failure':failure}
+			return render_to_response('home/menuA/admDispositivos/edDispositivo.html',ctx, context_instance = RequestContext(request))
+		if seleccion == "seleccionado":
+			name = request.POST['name']
+			dispositivo = Dispositivo.objects.get(nombre_produc=name)
+			print dispositivo
+			newname = dispositivo.nombre_produc
+			precio = dispositivo.precio_serv
+			descrip = dispositivo.descrip_serv
+			if request.POST['newname']:
+				newname = request.POST['newname']
+			if request.POST['precio']:
+				if esInt(request.POST['precio']) and (int(request.POST['precio'])>0):
+					precio = request.POST['precio']
+				else:
+					failure = "El precio debe ser un número mayor a cero."
+					ctx={'lista':lista,'failure':failure,'seleccion':dispositivo}
+					return render_to_response('home/menuA/admDispositivos/edDispositivo.html',ctx, context_instance = RequestContext(request))
+			if request.POST['descrip']:
+				descrip = request.POST['descrip']
+			new_dispositivo = Dispositivo.objects.filter(nombre_produc=dispositivo).update(nombre_produc=newname,precio_serv=precio,descrip_serv=descrip)
+			if request.POST['newname'] or request.POST['precio'] or request.POST['descrip']:
+				success="El dispositivo ha sido modificado."
+				failure=False
+			else:
+				success=False
+				failure="Nada fue modificado."
+			ctx={'success':success,'lista':lista,'failure':failure}
+			return render_to_response('home/menuA/admDispositivos/edDispositivo.html',ctx,context_instance = RequestContext(request))
+		else:
+			seleccion = Dispositivo.objects.get(nombre_produc = seleccion)
+			ctx = {'lista':lista,'seleccion':seleccion}
+			return render_to_response('home/menuA/admDispositivos/edDispositivo.html',ctx,context_instance = RequestContext(request))
+	else:
+		ctx = {'lista':lista}
+		return render_to_response('home/menuA/admDispositivos/edDispositivo.html',ctx, context_instance = RequestContext(request))
 
 #### Equipos Armados-------------------------------------
 def admEArmados_view(request):
@@ -246,6 +306,23 @@ def elEquipo_view(request):# Eliminar Equipo
 	return render_to_response('home/menuA/admEArmados/elEquipo.html',context_instance=RequestContext(request))
 
 def edEquipo_view(request):# Editar Equipo
+	lista = ServicioTecnico.objects.all().order_by('nombre_serv')
+	if request.method == 'POST':
+		seleccion = request.POST['selec']
+		if seleccion == "":
+			success = False
+			failure = "Debe elegir el servicio a editar."
+			ctx = {'lista':lista,'failure':failure}
+			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
+		if seleccion == "seleccionado":
+			success=True
+		else:
+			seleccion = ServicioTecnico.objects.get(nombre_serv = seleccion)
+			ctx = {'lista':lista,'seleccion':seleccion}
+			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx,context_instance = RequestContext(request))
+	else:
+		ctx = {'lista':lista}
+		return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
 	return render_to_response('home/menuA/admEArmados/edEquipo.html',context_instance=RequestContext(request))
 
 #### Servicios Técnicos------------------------------------------
@@ -253,26 +330,293 @@ def admSTecnicos_view(request):
 	return render_to_response('home/menuA/admSTecnicos/index.html',context_instance=RequestContext(request))
 
 def agSTecnico_view(request):# Agregar STecnico
-	return render_to_response('home/menuA/admSTecnicos/agSTecnico.html',context_instance=RequestContext(request))
+	if request.method == 'POST':
+		formulario = servicioForm(request.POST)
+		if formulario.is_valid():
+			nombre = formulario.cleaned_data['nombre_serv']
+			if ServicioTecnico.objects.filter(nombre_serv=nombre):
+				failure="Ya existe un servicio con el nombre ingresado."
+				formulario = servicioForm(request.POST)
+				ctx={'agregarServicioForm':formulario,'failure':failure}
+				return render_to_response('home/menuA/admSTecnicos/agSTecnico.html',ctx, context_instance = RequestContext(request))
+			precio = formulario.cleaned_data['precio_serv']
+			descripcion = formulario.cleaned_data['descrip_serv']
+			nuevo_servicio = ServicioTecnico(nombre_serv = nombre, precio_serv = precio, descrip_serv = descripcion)
+			nuevo_servicio.save()
+			formulario = servicioForm()
+			success = "Servicio añadido a la base de datos."
+			ctx = {'success':success,'agregarServicioForm':formulario}
+			return render_to_response('home/menuA/admSTecnicos/agSTecnico.html',ctx, context_instance = RequestContext(request))
+		else:
+			formulario = servicioForm(request.POST)
+			failure="Debe rellenar apropiadamente los datos."
+			ctx={'agregarServicioForm':formulario,'failure':failure}
+			return render_to_response('home/menuA/admSTecnicos/agSTecnico.html',ctx, context_instance = RequestContext(request))
+	else:
+		formulario = servicioForm()
+		ctx={'agregarServicioForm':formulario}
+		return render_to_response('home/menuA/admSTecnicos/agSTecnico.html',ctx,context_instance=RequestContext(request))
 
 def elSTecnico_view(request):# Eliminar STecnico
-	return render_to_response('home/menuA/admSTecnicos/elSTecnico.html',context_instance=RequestContext(request))
+	lista_servicios = ServicioTecnico.objects.all().order_by('nombre_serv')
+	if request.method == 'POST':
+		servicioEscogido = request.POST['servicio']
+		if servicioEscogido == "VACIO":
+			failure = "Debe elegir el servicio a eliminar."
+			success = False
+		else:
+			failure = False
+			eliminar_servicio = ServicioTecnico.objects.filter(nombre_serv = servicioEscogido).delete()
+			success = "Servicio eliminado de la base de datos."
+		ctx= {'success':success, 'lista_servicios':lista_servicios,'failure':failure}
+		return render_to_response('home/menuA/admSTecnicos/elSTecnico.html',ctx, context_instance = RequestContext(request))
+	else:
+		ctx = {'lista_servicios':lista_servicios}
+		return render_to_response('home/menuA/admSTecnicos/elSTecnico.html',ctx,context_instance = RequestContext(request))
 
 def edSTecnico_view(request):# Editar STecnico
-	return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',context_instance=RequestContext(request))
+	lista = ServicioTecnico.objects.all().order_by('nombre_serv')
+	if request.method == 'POST':
+		seleccion = request.POST['selec']
+		if seleccion == "":
+			success = False
+			failure = "Debe elegir el servicio a editar."
+			ctx = {'lista':lista,'failure':failure}
+			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
+		if seleccion == "seleccionado":
+			name = request.POST['name']
+			servicio = ServicioTecnico.objects.get(nombre_serv=name)
+			print servicio
+			newname = servicio.nombre_serv
+			precio = servicio.precio_serv
+			descrip = servicio.descrip_serv
+			if request.POST['newname']:
+				newname = request.POST['newname']
+			if request.POST['precio']:
+				if esInt(request.POST['precio']) and (int(request.POST['precio'])>0):
+					precio = request.POST['precio']
+				else:
+					failure = "El precio debe ser un número mayor a cero."
+					ctx={'lista':lista,'failure':failure,'seleccion':servicio}
+					return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
+			if request.POST['descrip']:
+				descrip = request.POST['descrip']
+			new_servicio = ServicioTecnico.objects.filter(nombre_serv=servicio).update(nombre_serv=newname,precio_serv=precio,descrip_serv=descrip)
+			if request.POST['newname'] or request.POST['precio'] or request.POST['descrip']:
+				success="El servicio ha sido modificado."
+				failure=False
+			else:
+				success=False
+				failure="Nada fue modificado."
+			ctx={'success':success,'lista':lista,'failure':failure}
+			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx,context_instance = RequestContext(request))
+		else:
+			seleccion = ServicioTecnico.objects.get(nombre_serv = seleccion)
+			ctx = {'lista':lista,'seleccion':seleccion}
+			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx,context_instance = RequestContext(request))
+	else:
+		ctx = {'lista':lista}
+		return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
 
 #### Compatibilidades------------------------------------------
 def admCompatibilidades_view(request):
 	return render_to_response('home/menuA/admCompatibilidades/index.html',context_instance=RequestContext(request))
 
 def agCompatibilidad_view(request):# Agregar Compatibilidad
-	return render_to_response('home/menuA/admCompatibilidades/agCompatibilidad.html',context_instance=RequestContext(request))
+	lista_dispositivo = Dispositivo.objects.all()
+	lista_subtipo = Subtipo.objects.all()
+	lista_compt = Compatibilidad.objects.all()
+	
+	if request.method =='POST':
+		dispositivo_id = request.POST['disp_elegido']
+		subtipo_escogido = request.POST.getlist('subtipo_escogido')
+
+		if ((dispositivo_id == '-1') or (subtipo_escogido == [])):
+			failure = "Debe elegir un dispositivo y al menos un subtipo"
+			ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'failure':failure}
+			return render_to_response('home/menuA/admCompatibilidades/agCompatibilidad.html',ctx,context_instance = RequestContext(request))
+
+		#Se selecciona el dispositivo elegido de la base de datos
+		disp = Dispositivo.objects.get(id = dispositivo_id)
+
+		#Se crea una lista con el dispositivo seleccionado y sus subtipos previamente compatibles
+		lista_compat_disp = Compatibilidad.objects.filter(dispositivo = dispositivo_id)
+		
+		lista_subtipo_id = []
+		for id_subtipo in lista_compat_disp:
+			lista_subtipo_id.append(id_subtipo.subtipo.id)
+		else:
+			for subt in subtipo_escogido:
+				subtipo = Subtipo.objects.get(id = subt)
+				compatibilidad = Compatibilidad(dispositivo = disp, subtipo = subtipo)
+				compatibilidad.save()
+			success = "Compatibilidad(es) agregada(s) a la base de datos"
+			ctx = {'lista_compt':lista_compt,'success':success,'dispositivo_comp':dispositivo_id,'subtipo_escogido':subtipo_escogido,'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo}
+	else:
+		lista_dispositivo = Dispositivo.objects.all()
+		lista_subtipo = Subtipo.objects.all()
+		ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'lista_compt':lista_compt}
+	return render_to_response('home/menuA/admCompatibilidades/agCompatibilidad.html',ctx,context_instance = RequestContext(request))
 
 def elCompatibilidad_view(request):# Eliminar Compatibilidad
-	return render_to_response('home/menuA/admCompatibilidades/elCompatibilidad.html',context_instance=RequestContext(request))
+	lista_dispositivo_compat = Compatibilidad.objects.all()
+	# lista_subtipo = Subtipo.objects.all()
+	# lista_dispositivo = Dispositivo.objects.all()
 
-def edCompatibilidad_view(request):# Editar Compatibilidad
-	return render_to_response('home/menuA/admCompatibilidades/edCompatibilidad.html',context_instance=RequestContext(request))
+	#Ponemos todos los dispositivos compatibles en la lista
+	lista_disp_compat = []
+	lista_dispositivo = []
+	for disp in lista_dispositivo_compat:
+		lista_disp_compat.append(disp.dispositivo.id)
+
+	lista_disp_compat = list(set(lista_disp_compat))
+
+	for disp in lista_disp_compat:
+		lista_dispositivo.append(Dispositivo.objects.get(id = disp))	
+
+	if request.method == 'POST':
+		lista_subtipos = request.POST.getlist('subtipos_compat')
+		disp_elegido = request.POST['disp_compat']
+
+
+		if (disp_elegido == '-1' or lista_subtipos == []):
+			failure = "Debe elegir subtipos compatibles para eliminar"
+			ctx = {'lista_dispositivo':lista_dispositivo,'failure':failure}
+			return render_to_response('home/menuA/admCompatibilidades/elCompatibilidad.html',ctx,context_instance = RequestContext(request))
+
+		lista_subtipos_ids = []
+
+		#Se almacenan lso ids de subtipos compatibles en una lista, debido a que dan problemas al manejarlos con el getlist
+		for x in lista_subtipos:
+			lista_subtipos_ids.append(int(x))
+
+		#Borramos la compatibilidad para cada subtipo escogido con el dispositivo escogido
+		for subt in lista_subtipos_ids:
+			subtipo = Subtipo.objects.get(id = subt)
+			disp = Dispositivo.objects.get(id = disp_elegido)
+			query_borrar = Compatibilidad.objects.get(dispositivo = disp, subtipo = subtipo).delete()
+
+		lista_dispositivo_compat = Compatibilidad.objects.all()
+		# lista_subtipo = Subtipo.objects.all()
+		# lista_dispositivo = Dispositivo.objects.all()
+
+		#Ponemos todos los dispositivos compatibles en la lista
+		lista_disp_compat = []
+		lista_dispositivo = []
+		for disp in lista_dispositivo_compat:
+			lista_disp_compat.append(disp.dispositivo.id)
+
+		lista_disp_compat = list(set(lista_disp_compat))
+
+		for disp in lista_disp_compat:
+			lista_dispositivo.append(Dispositivo.objects.get(id = disp))	
+
+		ctx = {'lista_dispositivo':lista_dispositivo,'success':"Compatibilidad(es) eliminada(s) de la base de datos"}
+	else:
+		ctx = {'lista_dispositivo':lista_dispositivo}
+	return render_to_response('home/menuA/admCompatibilidades/elCompatibilidad.html',ctx,context_instance = RequestContext(request))
+
+def agIncompatibilidad_view(request):# Agregar Incompatibilidad
+	lista_dispositivo = Dispositivo.objects.all()
+	lista_subtipo = Subtipo.objects.all()
+	incompatibilidad = Incompatibilidad.objects.all()
+	compatibilidad = Compatibilidad.objects.all()
+
+	if request.method =='POST':
+		dispositivo_id = request.POST['disp_elegido']
+		dispositivo_incompat_ids = request.POST.getlist('disp_incompatibles')
+		#Si no se elige alguno de los dos campos
+		if (dispositivo_id == '-1' or dispositivo_incompat_ids==[]):
+			failure = "Debe elegir un dispositivo y al menos otro dispositivo con que sea incompatible"
+			ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'failure':failure}
+			return render_to_response('home/menuA/admCompatibilidades/agIncompatibilidad.html',ctx,context_instance = RequestContext(request))
+
+		else:
+			for disp in dispositivo_incompat_ids:
+				dispositivo_id2 = int(disp)
+				print "dispostivo",dispositivo_id2
+
+
+				#Obtenemos disp1 y disp2, y los registramos en la tabla incompatibilidad
+				disp1 = Dispositivo.objects.get(id = dispositivo_id)
+				disp2 = Dispositivo.objects.get(id = dispositivo_id2)
+				incompatibilidad = Incompatibilidad(dispositivo1 = disp1, dispositivo2 = disp2)
+				incompatibilidad.save()
+			success = "Incompatibilidad(es) agregada(s) a la base de datos"
+			ctx = {'success':success,'dispositivo_incomp':dispositivo_id,'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'incompatibilidad':incompatibilidad}
+	else:
+		ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'incompatibilidad':incompatibilidad}
+	return render_to_response('home/menuA/admCompatibilidades/agIncompatibilidad.html',ctx,context_instance = RequestContext(request))
+
+def elIncompatibilidad_view(request):# Eliminar Incompatibilidad
+	lista_dispositivo_incompat = Incompatibilidad.objects.all()
+	lista_disp1_incompat = []
+	lista_disp2_incompat = []
+	lista_dispositivo = []
+	for disp1 in lista_dispositivo_incompat:
+		lista_disp1_incompat.append(disp1.dispositivo1.id)
+
+	for disp2 in lista_dispositivo_incompat:
+		lista_disp2_incompat.append(disp2.dispositivo2.id)
+
+	lista_disp_incompatibles = list(set(lista_disp1_incompat + lista_disp2_incompat))
+
+	lista_dispositivo1 = []
+	for dispo in lista_disp_incompatibles:
+		disp = Dispositivo.objects.get(id = dispo)
+		lista_dispositivo1.append(disp)
+
+	if request.method == 'POST':
+		lista_disp = request.POST.getlist('disp_incompatibles')
+		disp_elegido = request.POST['disp_elegido']
+
+		if (disp_elegido == '-1' or lista_disp == []):
+			failure = "Debe elegir dispositivos incompatibles para eliminar"
+			ctx = {'lista_dispositivo1':lista_dispositivo1,'failure':failure}
+			return render_to_response('home/menuA/admCompatibilidades/elIncompatibilidad.html',ctx,context_instance = RequestContext(request))
+
+		lista_dispositivo = []
+		#Almacenamos los ids del getlist en una lista, de otro modo dan problemas
+		for x in lista_disp:
+			lista_dispositivo.append(int(x))
+
+		#Borramos la incompatibilidad para cada subtipo escogido con el dispositivo escogido
+		for disp in lista_dispositivo:
+			id_incompatible = disp
+			disp_inicial = Dispositivo.objects.get(id = disp_elegido)
+			dispositivo_incompat = Dispositivo.objects.get(id = id_incompatible)
+			intento_1 = Incompatibilidad.objects.filter(dispositivo1 = disp_inicial, dispositivo2 = dispositivo_incompat)
+			intento_2 = Incompatibilidad.objects.filter(dispositivo1 =  dispositivo_incompat, dispositivo2 = disp_inicial)
+			
+			#Con .count(), vemos si existen dichas compatibilidades. No llama a error si es que no existen, por eso se utiliza.
+			if intento_1.count()>0:
+				intento_1.delete()
+				pass
+			else:
+				intento_2.delete();
+		lista_dispositivo_incompat = Incompatibilidad.objects.all()
+		
+		lista_disp1_incompat = []
+		lista_disp2_incompat = []
+		lista_dispositivo = []
+		for disp1 in lista_dispositivo_incompat:
+			lista_disp1_incompat.append(disp1.dispositivo1.id)
+
+		for disp2 in lista_dispositivo_incompat:
+			lista_disp2_incompat.append(disp2.dispositivo2.id)
+
+		#Mezclamos las incompatibilidades hacia los dos lados, y seleccionamos los ids de dispositivos diferentes
+		lista_disp_incompatibles = list(set(lista_disp1_incompat + lista_disp2_incompat))
+
+		lista_dispositivo1 = []
+		for dispo in lista_disp_incompatibles:
+			disp = Dispositivo.objects.get(id = dispo)
+			lista_dispositivo1.append(disp)
+
+		ctx = {'lista_dispositivo':lista_dispositivo,'success':"Incompatibilidad(es) eliminada(s) de la base de datos",'lista_dispositivo1':lista_dispositivo1}
+	else:
+		ctx = {'lista_dispositivo1':lista_dispositivo1}
+	return render_to_response('home/menuA/admCompatibilidades/elIncompatibilidad.html',ctx,context_instance = RequestContext(request))
 
 #### Tipos y Subtipos-------------------------------------
 def admTySubtipos_view(request):
@@ -286,6 +630,11 @@ def agTipo_view(request):# Agregar Tipo
 		if formulario.is_valid():
 			success = "Tipo añadido a la base de datos."
 			nuevo_nombre = formulario.cleaned_data['nombre_tipo']
+			if Tipo.objects.filter(nombre_tipo=nuevo_nombre):
+				failure="Ya existe un tipo con el nombre ingresado."
+				formulario = tipoForm(request.POST)
+				ctx={'agregarTipoForm':formulario,'failure':failure}
+				return render_to_response('home/menuA/admTySubtipos/agTipo.html',ctx, context_instance = RequestContext(request))
 			nuevo_tipo = Tipo(nombre_tipo = nuevo_nombre)
 			nuevo_tipo.save()
 			nuevo_tipo_form = tipoForm()
@@ -319,33 +668,23 @@ def elTipo_view(request):# Eliminar Tipo
 		return render_to_response('home/menuA/admTySubtipos/elTipo.html',ctx,context_instance = RequestContext(request))
 
 def edTipo_view(request):# Editar Tipo
-	lista_tipos = Tipo.objects.all().order_by('nombre_tipo')
+	lista = ServicioTecnico.objects.all().order_by('nombre_serv')
 	if request.method == 'POST':
-		formulario = tipoForm(request.POST)
-		if formulario.is_valid():
-			nuevo_nombre_tipo = formulario.cleaned_data['nombre_tipo']
-			tipoEscogido = request.POST['tipo']
-			if tipoEscogido == "VACIO":
-				success = False
-				failure = "Debe elegir el tipo a editar."
-			else:
-				success = "Tipo modificado."
-				failure = False
-				editar_tipo = Tipo.objects.filter(nombre_tipo = tipoEscogido).update(nombre_tipo = nuevo_nombre_tipo)
-				#editar_tipo.save()
-				formulario = tipoForm(request.POST)
-			ctx = {'success': success,'failure':failure,'editarTipoForm':formulario,'lista_tipos':lista_tipos}
-			return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx,context_instance = RequestContext(request))
+		seleccion = request.POST['selec']
+		if seleccion == "":
+			success = False
+			failure = "Debe elegir el servicio a editar."
+			ctx = {'lista':lista,'failure':failure}
+			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
+		if seleccion == "seleccionado":
+			success=True
 		else:
-			formulario = tipoForm(request.POST)
-			failure="Debe rellenar apropiadamente los datos."
-			ctx={'editarTipoForm':formulario,'failure':failure,'lista_tipos':lista_tipos}
-			return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx,context_instance = RequestContext(request))
-
+			seleccion = ServicioTecnico.objects.get(nombre_serv = seleccion)
+			ctx = {'lista':lista,'seleccion':seleccion}
+			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx,context_instance = RequestContext(request))
 	else:
-		formulario = tipoForm()
-		ctx = {'editarTipoForm':formulario,'lista_tipos':lista_tipos}
-		return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx, context_instance = RequestContext(request))
+		ctx = {'lista':lista}
+		return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
 
 def agSTipo_view(request):# Agregar Subtipo
 	global lista_subtipos
@@ -354,6 +693,11 @@ def agSTipo_view(request):# Agregar Subtipo
 		formulario = subtipoForm(request.POST)
 		if formulario.is_valid():
 			nuevo_nombre = formulario.cleaned_data['nombre_subtipo']
+			if Subtipo.objects.filter(nombre_subtipo=nuevo_nombre):
+				failure="Ya existe un subtipo con el nombre ingresado."
+				formulario = subtipoForm(request.POST)
+				ctx={'agregarSubtipoForm':formulario,'failure':failure,'lista_tipos':lista_tipos}
+				return render_to_response('home/menuA/admTySubtipos/agSTipo.html',ctx, context_instance = RequestContext(request))
 			tipo_asignado = formulario.cleaned_data['tipo_padre']
 			subtipo_asignado = formulario.cleaned_data['subtipo_padre']
 
@@ -411,7 +755,24 @@ def elSTipo_view(request):# Eliminar Subtipo
 		return render_to_response('home/menuA/admTySubtipos/elSTipo.html',ctx,context_instance=RequestContext(request))
 
 def edSTipo_view(request):# Editar Subtipo
-	return render_to_response('home/menuA/admTySubtipos/edSTipo.html',context_instance=RequestContext(request))
+	lista = ServicioTecnico.objects.all().order_by('nombre_serv')
+	if request.method == 'POST':
+		seleccion = request.POST['selec']
+		if seleccion == "":
+			success = False
+			failure = "Debe elegir el servicio a editar."
+			ctx = {'lista':lista,'failure':failure}
+			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
+		if seleccion == "seleccionado":
+			success=True
+		else:
+			seleccion = ServicioTecnico.objects.get(nombre_serv = seleccion)
+			ctx = {'lista':lista,'seleccion':seleccion}
+			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx,context_instance = RequestContext(request))
+	else:
+		ctx = {'lista':lista}
+		return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
+	return render_to_response('home/menuA/admTySubtipos/elSTipo.html',context_instance=RequestContext(request))
 
 #### Empleados---------------------------------------
 def admEmpleados_view(request):
@@ -498,7 +859,6 @@ def edEmpleado_view(request):# Eliminar Empleado
 				new_user = User.objects.filter(username=empleadoEscogido).update(first_name=name,last_name=rut,email=mail,is_staff=True)
 			ctx={'success':"El empleado ha sido modificado.",'lista_empleados':lista_empleados}
 			return render_to_response('home/menuA/admEmpleados/edEmpleado.html',ctx,context_instance = RequestContext(request))
-			success = "Empleado modificado."
 		ctx= {'success':success, 'lista_empleados':lista_empleados,'failure':failure}
 		return render_to_response('home/menuA/admEmpleados/edEmpleado.html',ctx, context_instance = RequestContext(request))
 	else:
@@ -524,10 +884,147 @@ def regServicio_view(request):
 ################## Menu Administrador ######################
 
 
-
-
-
-
-
 def menuE_view(request):
 	return render_to_response('home/menuE.html',context_instance=RequestContext(request))
+
+
+
+
+
+#################################################################################
+########################    FUNCIONES CON AJAX   ################################
+#################################################################################
+
+def ajax_validar_disp_diferente(request):
+
+	if request.method == 'POST':
+		id_disp = request.POST['id']
+		lista_dispositivo =  Dispositivo.objects.all()
+		lista_subtipo = Subtipo.objects.all()
+		dispositivo_anulado = Dispositivo.objects.get(id = id_disp)
+
+		query_incompat1 = Incompatibilidad.objects.filter(dispositivo1 = dispositivo_anulado)
+		query_incompat2 = Incompatibilidad.objects.filter(dispositivo2 = dispositivo_anulado)
+
+		if (query_incompat1 or query_incompat2):
+
+			#Lista que almacena todos los ids de dispositivos2 incompatibles con dispositivo escogido
+			lista_disp_incompat1 = []
+			#Lista que almacena todos los ids de dispositivos1 incompatibles con dispositivo escogido
+			lista_disp_incompat2 = []
+
+			if query_incompat1:
+				for incompat1 in query_incompat1:
+					lista_disp_incompat1.append(incompat1.dispositivo2.id)
+			if query_incompat2:
+				for incompat2 in query_incompat2:
+					lista_disp_incompat2.append(incompat2.dispositivo1.id)	
+
+			#unimos las dos listas, obteniendo todos los ids incompatibles con el disp elegido, pueden haber repetidos, por eso usamos set
+			dispositivos_incompatibles = list(set(lista_disp_incompat1 + lista_disp_incompat2))
+
+			ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo, 'dispositivo_anulado':dispositivo_anulado, 'dispositivos_incompatibles':dispositivos_incompatibles}
+			return render_to_response('ajax/validar_dispositivo_diferente.html',ctx,context_instance = RequestContext(request))
+		else:
+			ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo, 'dispositivo_anulado':dispositivo_anulado}
+			return render_to_response('ajax/validar_dispositivo_diferente.html',ctx,context_instance = RequestContext(request))
+	else:
+		pass
+
+def ajax_validar_disp_diferente_comp(request):
+	if request.method == 'POST':
+		id_disp = request.POST['id']
+		lista_dispositivo =  Dispositivo.objects.all()
+		lista_subtipo = Subtipo.objects.all()
+		lista_subtipos_compatibles = []
+
+		query_dispositivo = Dispositivo.objects.get(id = id_disp)
+		query_compatibles_previos = Compatibilidad.objects.filter(dispositivo = query_dispositivo)
+		subtipo_disp = query_dispositivo.subtipo_disp
+		id_subtipo_disp = subtipo_disp.id
+
+		lista_subtipos_compatibles.append(id_subtipo_disp)
+
+		#Si existen compatibilidades previas:
+		if query_compatibles_previos:
+			#Lista de IDs de los subtipos que ya eran compatibles con el dispsotivo elegido
+			
+			for elemento in query_compatibles_previos:
+				lista_subtipos_compatibles.append(elemento.subtipo.id)
+
+			print lista_subtipos_compatibles
+			ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo, 'lista_subtipos_compatibles':lista_subtipos_compatibles}
+			return render_to_response('ajax/validar_dispositivo_diferente_comp.html',ctx,context_instance = RequestContext(request))
+		else:
+			ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo, 'lista_subtipos_compatibles':lista_subtipos_compatibles}
+			return render_to_response('ajax/validar_dispositivo_diferente_comp.html',ctx,context_instance = RequestContext(request))
+	else:
+		pass
+
+def ajax_activar_input(request):
+	if request.method == 'POST':
+		ctx={}
+		return render_to_response('ajax/activar_input.html',ctx,context_instance = RequestContext(request))
+	else:
+		pass
+
+def ajax_listar_compatibilidad(request):
+	if request.method == 'POST':
+		id_disp = request.POST['id']
+		dispositivo = Dispositivo.objects.get(id = id_disp)
+
+		query_incompat1 = Compatibilidad.objects.filter(dispositivo = dispositivo)
+		ctx = {'lista_subtipo':query_incompat1}
+		return render_to_response('ajax/listar_compatibilidad.html',ctx,context_instance=RequestContext(request))		
+	else:
+		pass
+
+def ajax_listar_incompatibilidad(request):
+	if request.method == 'POST':
+		id_disp = request.POST['id']
+		dispositivo = Dispositivo.objects.get(id = id_disp)
+
+		lista_disp_incompatibles = []
+		query_incompat1 = Incompatibilidad.objects.filter(dispositivo1 = dispositivo)
+		query_incompat2 = Incompatibilidad.objects.filter(dispositivo2 = dispositivo)
+
+		print query_incompat1
+		print query_incompat2
+
+		#Lista que almacena todos los ids de dispositivos2 incompatibles con dispositivo escogido
+		lista_disp_incompat1 = []
+		#Lista que almacena todos los ids de dispositivos1 incompatibles con dispositivo escogido
+		lista_disp_incompat2 = []
+
+		if query_incompat1:
+			for incompat1 in query_incompat1:
+				lista_disp_incompat1.append(incompat1.dispositivo2.id)
+		if query_incompat2:
+			for incompat2 in query_incompat2:
+				lista_disp_incompat2.append(incompat2.dispositivo1.id)	
+
+		#unimos las dos listas, obteniendo todos los ids incompatibles con el disp elegido, pueden haber repetidos, por eso usamos set
+		dispositivos_incompatibles = list(set(lista_disp_incompat1 + lista_disp_incompat2))
+		lista_dispositivo = []
+		
+		#Llamamos a cada instancia del dispositivo con los ids
+		for disp in dispositivos_incompatibles:
+			lista_dispositivo.append(Dispositivo.objects.get(id = disp))
+
+		ctx = {'lista_dispositivo':lista_dispositivo}
+		return render_to_response('ajax/listar_incompatibilidad.html',ctx,context_instance=RequestContext(request))		
+	else:
+		pass
+
+def ajax_editar_servicio(request):
+	if request.method == 'POST':
+		id_servicio = request.POST['id']
+		
+		#Se obtienen los datos del servicio y se rellena el formulario con ellos
+		datos_servicio = ServicioTecnico.objects.get(id = id_servicio)
+		formulario = servicioForm(instance = datos_servicio)
+
+		ctx = {'editarServicioForm':formulario}
+		return render_to_response('ajax/editar_servicio.html',ctx,context_instance=RequestContext(request))	
+	else:
+		pass
