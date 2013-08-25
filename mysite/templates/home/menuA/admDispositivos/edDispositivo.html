@@ -4,27 +4,14 @@
 <ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Editar Dispositivo</b></a></li></ul>
 
 {% if lista %}
-    <form action="." method="POST">
-        <table class="table table-bordered">
-            {% if seleccion %}
-                <tr><th>Nombre:<input hidden name="selec" value="seleccionado"><input hidden name="name" value="{{ seleccion.nombre_serv }}"></th>
-                <td>{{ seleccion.nombre_serv }}</td></tr>
-                <tr><th><label for="id_1">Nuevo Nombre:</label></th><td><input id="id_1" type="text" placeholder="{{ seleccion.nombre_serv }}" name="newname"/></td></tr>
-                <tr><th><label for="id_2">Precio:</label></th><td><input id="id_2" type="text" placeholder="{{ seleccion.precio_serv }}" name="precio"/></td></tr>
-                <tr><th><label for="id_3">Descripción:</label></th><td><input id="id_3" type="text" placeholder="{{ seleccion.descrip_serv }}" name="descrip"/></td></tr>
-            {% else %}
-                <tr><th><label>Nombre:</label></th>
-                <td><select name = "selec">
-                    <option value = "">---------</option>
-                    {% for objeto in lista %}
-                        <option value = "{{ objeto.nombre_produc }}">{{ objeto.nombre_produc }}</option>
-                    {% endfor %}
-                </select></td></tr>
-            {% endif %}                
-            {% csrf_token %}
-        </table>
-    	<input type="submit" class="btn btn-success" name="submit" style="font-weight:bold;" value="Editar">
-    </form>
+<form action="." method="POST">
+    <table class="table table-bordered">
+        {{ editarDispositivoForm}}              
+        {% csrf_token %}
+    </table>
+    <input type="hidden" name="id_dispositivo" value="{{ id_dispositivo }}">
+	<input type="submit" class="btn btn-success" name="submit" style="font-weight:bold;" value="Editar">
+</form>
 {% else %}
     <div class="alert alert-danger">
       <button type="button" class="close" data-dismiss="alert">&times;</button>

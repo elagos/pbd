@@ -3,20 +3,25 @@
 {% block contenidoaTyS %}
 <ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Editar Tipo</b></a></li></ul>
 
-{% if lista_tipos %}
+{% if lista %}
     <form action="." method="POST">
         <table class="table table-bordered">
-            <tr><th><label>Tipo:</label></th>
-            <td><select name = "tipo">
-                <option value = "VACIO">---------</option>
-                {% for tipo in lista_tipos %}
-                    <option value = "{{ tipo.nombre_tipo }}">{{ tipo.nombre_tipo }}</option>
-                {% endfor %}
-            </select></td></tr>
-            {{ editarTipoForm}}
+            {% if seleccion %}
+                <tr><th>Nombre:<input hidden name="selec" value="seleccionado"><input hidden name="name" value="{{ seleccion.nombre_tipo }}"></th>
+                <td>{{ seleccion.nombre_tipo }}</td></tr>
+                <tr><th><label for="id_1">Nuevo Nombre:</label></th><td><input id="id_1" type="text" placeholder="{{ seleccion.nombre_tipo }}" name="newname"/></td></tr>
+            {% else %}
+                <tr><th><label>Nombre:</label></th>
+                <td><select name = "selec">
+                    <option value = "">---------</option>
+                    {% for objeto in lista %}
+                        <option value = "{{ objeto.nombre_tipo }}">{{ objeto.nombre_tipo }}</option>
+                    {% endfor %}
+                </select></td></tr>
+            {% endif %}                
             {% csrf_token %}
         </table>
-    	<input type="submit" class="btn btn-success" name="submit" style="font-weight:bold;" value="Agregar">
+        <input type="submit" class="btn btn-success" name="submit" style="font-weight:bold;" value="Editar">
     </form>
 {% else %}
     <div class="alert alert-danger">

@@ -23,14 +23,61 @@ Buscarlo en "making queries"
 """
 
 def index_view(request):
-	lista_tipo = Tipo.objects.all()
-	lista_subtipo = Subtipo.objects.all()
-	ctx = {'lista_tipo': lista_tipo, 'lista_subtipo':lista_subtipo}
+	ctx = {'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 	return render_to_response('home/index.html',ctx,context_instance=RequestContext(request))
+
+def categorias_view(request):
+	if request.method == 'POST':
+		subtipo = int(request.POST['subtipo'])
+		categoria = request.POST['categoria']
+		lista_subtipo = Subtipo.objects.all().order_by('nombre_subtipo')
+
+		lista_dispositivo = []
+		#Conseguimos los dispositivos de ese subtipo
+		lista_dispos = Dispositivo.objects.filter(subtipo_disp = subtipo)
+		for disp in lista_dispos:
+					lista_dispositivo.append(disp)
+		#Subtipo escogido
+		subtipo_filtrado = Subtipo.objects.get(id = subtipo)
+		#hijos directos del subtipo para mostrarlos en el select
+		lista_subtipos_hijos = Subtipo.objects.filter(subtipo_padre = subtipo_filtrado)
+		#Nombre subtipo
+		nombre = subtipo_filtrado.nombre_subtipo
+		#Almacenamos el nivel de categoria en que se encuentra, para mostrarlo en el template
+		categoria = categoria + ' / ' + nombre
+		#funcioncon la que se retornan todos los dispositivos de subtipos hijos
+		for subt in lista_subtipos_hijos:
+			hijos = descendientes_de_subtipo(subt.id)
+			for elemento in hijos:
+				dispositivo = Dispositivo.objects.filter(subtipo_disp = elemento)
+				for disp in dispositivo:
+					lista_dispositivo.append(disp)
+		
+		ctx = {'lista_subtipo':lista_subtipos_hijos,'lista_dispositivo':lista_dispositivo,'nombre':nombre,'lista_subtipos_hijos':lista_subtipos_hijos,'categoria':categoria,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+		return render_to_response('home/categorias.html',ctx, context_instance = RequestContext(request))
+
+	if request.method == 'GET':
+		if 'tipo' in request.GET:
+			nombre = request.GET['tipo']
+			tipo = Tipo.objects.get(nombre_tipo= nombre)
+			nombre = tipo.nombre_tipo
+			lista_subtipos_hijos = Subtipo.objects.filter(tipo_padre = tipo)
+			lista_dispositivo = []
+			categoria = nombre
+			for subtipo in lista_subtipos_hijos:
+				hijos = descendientes_de_subtipo(subtipo.id)
+				for elemento in hijos:
+					dispositivo = Dispositivo.objects.filter(subtipo_disp = elemento)
+					for disp in dispositivo:
+						lista_dispositivo.append(disp)
+
+			ctx = {'lista_dispositivo':lista_dispositivo,'lista_subtipos_hijos':lista_subtipos_hijos,'nombre':nombre,'categoria':categoria,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+			return render_to_response('home/categorias.html',ctx, context_instance = RequestContext(request))
+	return HttpResponseRedirect("/home/")
 
 
 #def _view(request):
-#    return render_to_response('home/.html',context_instance=RequestContext(request))
+#    return render_to_response('home.html',context_instance=RequestContext(request))
 
 def getCore(request):
 	if request.method == 'GET':
@@ -78,16 +125,17 @@ def register_view(request):
 				rut = request.POST['rut']
 				mail = request.POST['mail']
 				new_user = User.objects.filter(username=new_user.username).update(first_name=name,last_name=rut,email=mail)
-				return render_to_response('registration/register.html', {'registro':True,},context_instance = RequestContext(request))
+				return render_to_response('registration/register.html', {'registro':True,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))
 			else:
 				form = UserCreationForm(request.POST)
-				return render_to_response('registration/register.html', {'form': form,'error':"Debe ingresar un rut válido con el siguiente formato: XXXXXXXX-Y."},context_instance = RequestContext(request))
+				ctx={'form': form,'error':"Debe ingresar un rut válido con el siguiente formato: XXXXXXXX-Y.",'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+				return render_to_response('registration/register.html',ctx ,context_instance = RequestContext(request))
 		else:
 			form = UserCreationForm(request.POST)
-			return render_to_response('registration/register.html', {'form': form,'failure':True},context_instance = RequestContext(request))
+			return render_to_response('registration/register.html', {'form': form,'failure':True,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))
 	else:
 		form = UserCreationForm()
-		return render_to_response('registration/register.html', {'form': form,},context_instance = RequestContext(request))
+		return render_to_response('registration/register.html', {'form': form,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))
 
 @login_required
 def edprofile_view(request):
@@ -110,15 +158,16 @@ def edprofile_view(request):
 							if esRut(request.POST['rut']) and  digito_verificador(numRut) == codVer:
 								rut = request.POST['rut']
 							else:
-								return render_to_response('registration/edProfile.html', {'error':"Debe ingresar un rut válido con el siguiente formato: XXXXXXXX-Y."},context_instance = RequestContext(request))
+								ctx={'error':"Debe ingresar un rut válido con el siguiente formato: XXXXXXXX-Y.",'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+								return render_to_response('registration/edProfile.html', ctx,context_instance = RequestContext(request))
 						if request.POST['mail']:
 							mail = request.POST['mail']
 						request.user.set_password(newpass)
 						request.user.save()
 						new_user = User.objects.filter(username=request.user.username).update(first_name=name,last_name=rut,email=mail)
-						return render_to_response('registration/edProfile.html', {'success':True},context_instance = RequestContext(request))
+						return render_to_response('registration/edProfile.html', {'success':True,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))
 					else:
-						return render_to_response('registration/edProfile.html', {'error':"Las nuevas contraseñas ingresadas no coinciden entre si."},context_instance = RequestContext(request))
+						return render_to_response('registration/edProfile.html', {'error':"Las nuevas contraseñas ingresadas no coinciden entre si.",'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))
 				else:
 					name = request.user.first_name
 					rut = request.user.last_name
@@ -131,29 +180,29 @@ def edprofile_view(request):
 						if esRut(request.POST['rut']) and digito_verificador(numRut) == codVer:
 							rut = request.POST['rut']
 						else:
-							return render_to_response('registration/edProfile.html', {'error':"Debe ingresar un rut válido con el siguiente formato: XXXXXXXX-Y."},context_instance = RequestContext(request))
+							return render_to_response('registration/edProfile.html', {'error':"Debe ingresar un rut válido con el siguiente formato: XXXXXXXX-Y.",'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))
 					if request.POST['mail']:
 						mail = request.POST['mail']
 					new_user = User.objects.filter(username=request.user.username).update(first_name=name,last_name=rut,email=mail)
 					return render_to_response('registration/edProfile.html', {'success':True},context_instance = RequestContext(request))
 			else:
-				return render_to_response('registration/edProfile.html', {'error':"La contraseña ingresada no es correcta."},context_instance = RequestContext(request))
+				return render_to_response('registration/edProfile.html', {'error':"La contraseña ingresada no es correcta.",'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))
 		else:
-			return render_to_response('registration/edProfile.html', {'error':"Debe ingresar su contraseña para realizar cualquier cambio."},context_instance = RequestContext(request))
+			return render_to_response('registration/edProfile.html', {'error':"Debe ingresar su contraseña para realizar cualquier cambio.",'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))
 	else:
-		return render_to_response('registration/edProfile.html',context_instance = RequestContext(request))
+		return render_to_response('registration/edProfile.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))
 
 @login_required
 def elprofile_view(request):
 	if request.method == 'POST':
 		new_user = User.objects.filter(username=request.user.username).delete()
-		return render_to_response('registration/elProfile.html',{'success':True},context_instance = RequestContext(request))
+		return render_to_response('registration/elProfile.html',{'success':True,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))
 	else:
-		return render_to_response('registration/elProfile.html',context_instance = RequestContext(request))
+		return render_to_response('registration/elProfile.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))
 
 @login_required
 def profile_view(request):
-	return render_to_response('registration/profile.html',context_instance = RequestContext(request))
+	return render_to_response('registration/profile.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))
 
 def logout_view(request):
 	auth.logout(request)
@@ -169,9 +218,9 @@ def logout_view(request):
 def formularioCarrito_view(request):
 	if request.method == 'POST':
 		success = request.POST['optionsRadios']
-		ctx = {'success':success}
+		ctx = {'success':success,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/carrito/formularioCarrito.html',ctx,context_instance = RequestContext(request))# Fin Menu Administrador
-	return render_to_response('home/carrito/formularioCarrito.html',context_instance = RequestContext(request))# Fin Menu Administrador
+	return render_to_response('home/carrito/formularioCarrito.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))# Fin Menu Administrador
 
 
 def addCarrito(numerito):
@@ -199,14 +248,48 @@ def carrito_view(request):
 ################## Menu Administrador ######################
 ##########------------------------------------##############
 def menuA_view(request):
-	return render_to_response('home/menuA/admStock.html',context_instance = RequestContext(request))# Fin Menu Administrador
+	return render_to_response('home/menuA/admStock.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))# Fin Menu Administrador
 
 def admStock_view(request):
-	return render_to_response('home/menuA/admStock.html',context_instance=RequestContext(request))
+	lista_dispositivo = Dispositivo.objects.all()
+	lista_subtipo = Subtipo.objects.all()
+	if request.method == 'POST':
+		if not request.POST['disp']:
+			stockForm = abastecimientoForm() 
+			ctx = {'failure':"Asegurese de ingresar bien los datos",'stockForm':stockForm,'lista_sub':lista_subtipo,'lista_disp':lista_dispositivo}
+			return render_to_response('home/menuA/admStock.html',ctx,context_instance=RequestContext(request))
+		formulario = abastecimientoForm(request.POST)
+		if formulario.is_valid():
+			producto = request.POST['disp']
+			cantidad = formulario.cleaned_data['cant_abast']
+			fecha = formulario.cleaned_data['fecha']
+			product = Producto.objects.get(id=producto)
+			nuevo_abast = Abastecimiento(producto_abast = product, cant_abast = cantidad, fecha = fecha)
+			stockForm = abastecimientoForm()
+			nuevo_abast.save()
+			success = True
+			stockForm = abastecimientoForm()
+
+			#Trigger que suma la cantidada a tabla "Dispositivo"
+			dispositivo = Dispositivo.objects.get(id = producto)
+			nueva_cantidad = dispositivo.cantidad_disp + cantidad
+			producto_id = dispositivo.id
+			update_cantidad = Dispositivo.objects.get(id = producto_id)
+			update_cantidad.cantidad_disp = nueva_cantidad
+			update_cantidad.save()
+			disp_nueva_cant = Dispositivo.objects.get(id = producto_id)
+			ctx = {'success':"La base de datos ha sido actualizada",'stockForm':stockForm,'lista_sub':lista_subtipo,'lista_disp':lista_dispositivo}
+		else:
+			stockForm = abastecimientoForm() 
+			ctx = {'failure':"Asegurese de ingresar bien los datos",'stockForm':stockForm,'lista_sub':lista_subtipo,'lista_disp':lista_dispositivo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+	else:
+		formulario = abastecimientoForm() 
+		ctx = {'stockForm':formulario,'lista_sub':lista_subtipo,'lista_disp':lista_dispositivo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+	return render_to_response('home/menuA/admStock.html',ctx,context_instance=RequestContext(request))
 
 #### Dispositivos-------------------------------------
 def admDispositivos_view(request):
-	return render_to_response('home/menuA/admDispositivos/index.html',context_instance=RequestContext(request))
+	return render_to_response('home/menuA/admDispositivos/index.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance=RequestContext(request))
 
 def agDispositivo_view(request):# Agregar Dispositivo
 	lista_dispositivos = Dispositivo.objects.all()
@@ -223,20 +306,20 @@ def agDispositivo_view(request):# Agregar Dispositivo
 			descripcion = formulario.cleaned_data['descrip_disp']
 			imagen = formulario.cleaned_data['imagen_disp']
 			marca = formulario.cleaned_data['marca_disp']
-			nuevo_dispositivo = Dispositivo(nombre_produc = nombre, subtipo_disp = subtipo,destacado = False, cantidad_disp = 0,precio_disp = precio, descrip_disp = descripcion, marca_disp = marca)
+			nuevo_dispositivo = Dispositivo(nombre_produc = nombre, subtipo_disp = subtipo,destacado = False, cantidad_disp = 0,precio_disp = precio,imagen_disp=imagen, descrip_disp = descripcion, marca_disp = marca)
 			nuevo_dispositivo.save()
 			formulario = dispositivoForm()
 			success = "Dispositivo añadido a la base de datos."
-			ctx = {'success':success,'agregarDispositivoForm':formulario}
+			ctx = {'success':success,'agregarDispositivoForm':formulario,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 			return render_to_response('home/menuA/admDispositivos/agDispositivo.html',ctx, context_instance = RequestContext(request))
 		else:
 			formulario = dispositivoForm(request.POST)
 			failure="Debe rellenar apropiadamente los datos."
-			ctx={'agregarDispositivoForm':formulario,'failure':failure}
+			ctx={'agregarDispositivoForm':formulario,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 			return render_to_response('home/menuA/admDispositivos/agDispositivo.html',ctx, context_instance = RequestContext(request))
 	else:
 		formulario = dispositivoForm()
-		ctx={'agregarDispositivoForm':formulario}
+		ctx={'agregarDispositivoForm':formulario,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admDispositivos/agDispositivo.html',ctx,context_instance=RequestContext(request))
 
 def elDispositivo_view(request):# Eliminar Dispositivo
@@ -246,58 +329,27 @@ def elDispositivo_view(request):# Eliminar Dispositivo
 		dispositivoEscogido = request.POST['disp_elegido']
 		eliminar_dispositivo = Dispositivo.objects.filter(id = dispositivoEscogido).delete()
 		success = "Dispositivo eliminado de la base de datos."
-		ctx= {'success':success, 'lista_dispositivo':lista_dispositivo,'lista_subtipo':lista_subtipo}
+		ctx= {'success':success, 'lista_dispositivo':lista_dispositivo,'lista_subtipo':lista_subtipo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+		return render_to_response('home/menuA/admDispositivos/elDispositivo.html',ctx,context_instance=RequestContext(request))
 	else:
-		ctx = {'lista_subtipo':lista_subtipo,'lista_dispositivo':lista_dispositivo}
+		ctx = {'lista_subtipo':lista_subtipo,'lista_dispositivo':lista_dispositivo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admDispositivos/elDispositivo.html',ctx,context_instance=RequestContext(request))
 
 def edDispositivo_view(request):# Editar Dispositivo
-	lista = Dispositivo.objects.all().order_by('nombre_produc')
-	if request.method == 'POST':
-		seleccion = request.POST['selec']
-		if seleccion == "":
-			success = False
-			failure = "Debe elegir el dispositivo a editar."
-			ctx = {'lista':lista,'failure':failure}
-			return render_to_response('home/menuA/admDispositivos/edDispositivo.html',ctx, context_instance = RequestContext(request))
-		if seleccion == "seleccionado":
-			name = request.POST['name']
-			dispositivo = Dispositivo.objects.get(nombre_produc=name)
-			print dispositivo
-			newname = dispositivo.nombre_produc
-			precio = dispositivo.precio_serv
-			descrip = dispositivo.descrip_serv
-			if request.POST['newname']:
-				newname = request.POST['newname']
-			if request.POST['precio']:
-				if esInt(request.POST['precio']) and (int(request.POST['precio'])>0):
-					precio = request.POST['precio']
-				else:
-					failure = "El precio debe ser un número mayor a cero."
-					ctx={'lista':lista,'failure':failure,'seleccion':dispositivo}
-					return render_to_response('home/menuA/admDispositivos/edDispositivo.html',ctx, context_instance = RequestContext(request))
-			if request.POST['descrip']:
-				descrip = request.POST['descrip']
-			new_dispositivo = Dispositivo.objects.filter(nombre_produc=dispositivo).update(nombre_produc=newname,precio_serv=precio,descrip_serv=descrip)
-			if request.POST['newname'] or request.POST['precio'] or request.POST['descrip']:
-				success="El dispositivo ha sido modificado."
-				failure=False
-			else:
-				success=False
-				failure="Nada fue modificado."
-			ctx={'success':success,'lista':lista,'failure':failure}
-			return render_to_response('home/menuA/admDispositivos/edDispositivo.html',ctx,context_instance = RequestContext(request))
-		else:
-			seleccion = Dispositivo.objects.get(nombre_produc = seleccion)
-			ctx = {'lista':lista,'seleccion':seleccion}
-			return render_to_response('home/menuA/admDispositivos/edDispositivo.html',ctx,context_instance = RequestContext(request))
+	lista = Dispositivo.objects.all()
+	if (request.method=='POST'):
+		id_dispositivo = int(request.POST['id_dispositivo'])
+		datos_dispositivo = Dispositivo.objects.get(id = id_dispositivo)
+		formulario = dispositivoForm(instance = datos_dispositivo)
+		ctx = {'editarDispositivo':formulario, 'id_dispositivo':id_dispositivo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 	else:
-		ctx = {'lista':lista}
-		return render_to_response('home/menuA/admDispositivos/edDispositivo.html',ctx, context_instance = RequestContext(request))
+		mensaje = "Hubo un problema al intentar la solicitud. Intente nuevamente. Si el problema persiste, contáctese con el administrador"
+		ctx = {'mensaje': mensaje,'lista':lista,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+	return render_to_response('home/menuA/admDispositivos/edDispositivo.html', ctx, context_instance = RequestContext(request))
 
 #### Equipos Armados-------------------------------------
 def admEArmados_view(request):
-	return render_to_response('home/menuA/admEArmados/index.html',context_instance=RequestContext(request))
+	return render_to_response('home/menuA/admEArmados/index.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance=RequestContext(request))
 
 def agEquipo_view(request):# Agregar Equipo
 	return render_to_response('home/menuA/admEArmados/agEquipo.html',context_instance=RequestContext(request))
@@ -327,7 +379,7 @@ def edEquipo_view(request):# Editar Equipo
 
 #### Servicios Técnicos------------------------------------------
 def admSTecnicos_view(request):
-	return render_to_response('home/menuA/admSTecnicos/index.html',context_instance=RequestContext(request))
+	return render_to_response('home/menuA/admSTecnicos/index.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance=RequestContext(request))
 
 def agSTecnico_view(request):# Agregar STecnico
 	if request.method == 'POST':
@@ -336,8 +388,12 @@ def agSTecnico_view(request):# Agregar STecnico
 			nombre = formulario.cleaned_data['nombre_serv']
 			if ServicioTecnico.objects.filter(nombre_serv=nombre):
 				failure="Ya existe un servicio con el nombre ingresado."
+				ctx={'agregarServicioForm':formulario,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+				return render_to_response('home/menuA/admSTecnicos/agSTecnico.html',ctx, context_instance = RequestContext(request))
+			if ServicioTecnico.objects.filter(nombre_serv=nombre):
+				failure="Ya existe un servicio con el nombre ingresado."
 				formulario = servicioForm(request.POST)
-				ctx={'agregarServicioForm':formulario,'failure':failure}
+				ctx={'agregarServicioForm':formulario,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 				return render_to_response('home/menuA/admSTecnicos/agSTecnico.html',ctx, context_instance = RequestContext(request))
 			precio = formulario.cleaned_data['precio_serv']
 			descripcion = formulario.cleaned_data['descrip_serv']
@@ -345,16 +401,16 @@ def agSTecnico_view(request):# Agregar STecnico
 			nuevo_servicio.save()
 			formulario = servicioForm()
 			success = "Servicio añadido a la base de datos."
-			ctx = {'success':success,'agregarServicioForm':formulario}
+			ctx = {'success':success,'agregarServicioForm':formulario,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 			return render_to_response('home/menuA/admSTecnicos/agSTecnico.html',ctx, context_instance = RequestContext(request))
 		else:
 			formulario = servicioForm(request.POST)
 			failure="Debe rellenar apropiadamente los datos."
-			ctx={'agregarServicioForm':formulario,'failure':failure}
+			ctx={'agregarServicioForm':formulario,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 			return render_to_response('home/menuA/admSTecnicos/agSTecnico.html',ctx, context_instance = RequestContext(request))
 	else:
 		formulario = servicioForm()
-		ctx={'agregarServicioForm':formulario}
+		ctx={'agregarServicioForm':formulario,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admSTecnicos/agSTecnico.html',ctx,context_instance=RequestContext(request))
 
 def elSTecnico_view(request):# Eliminar STecnico
@@ -368,10 +424,10 @@ def elSTecnico_view(request):# Eliminar STecnico
 			failure = False
 			eliminar_servicio = ServicioTecnico.objects.filter(nombre_serv = servicioEscogido).delete()
 			success = "Servicio eliminado de la base de datos."
-		ctx= {'success':success, 'lista_servicios':lista_servicios,'failure':failure}
+		ctx= {'success':success, 'lista_servicios':lista_servicios,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admSTecnicos/elSTecnico.html',ctx, context_instance = RequestContext(request))
 	else:
-		ctx = {'lista_servicios':lista_servicios}
+		ctx = {'lista_servicios':lista_servicios,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admSTecnicos/elSTecnico.html',ctx,context_instance = RequestContext(request))
 
 def edSTecnico_view(request):# Editar STecnico
@@ -381,23 +437,26 @@ def edSTecnico_view(request):# Editar STecnico
 		if seleccion == "":
 			success = False
 			failure = "Debe elegir el servicio a editar."
-			ctx = {'lista':lista,'failure':failure}
+			ctx = {'lista':lista,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
 		if seleccion == "seleccionado":
 			name = request.POST['name']
 			servicio = ServicioTecnico.objects.get(nombre_serv=name)
-			print servicio
 			newname = servicio.nombre_serv
 			precio = servicio.precio_serv
 			descrip = servicio.descrip_serv
 			if request.POST['newname']:
+				if ServicioTecnico.objects.filter(nombre_serv=request.POST['newname']):
+					failure="Ya existe un servicio con el nombre ingresado."
+					ctx={'lista':lista,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+					return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
 				newname = request.POST['newname']
 			if request.POST['precio']:
 				if esInt(request.POST['precio']) and (int(request.POST['precio'])>0):
 					precio = request.POST['precio']
 				else:
 					failure = "El precio debe ser un número mayor a cero."
-					ctx={'lista':lista,'failure':failure,'seleccion':servicio}
+					ctx={'lista':lista,'failure':failure,'seleccion':servicio,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 					return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
 			if request.POST['descrip']:
 				descrip = request.POST['descrip']
@@ -408,19 +467,19 @@ def edSTecnico_view(request):# Editar STecnico
 			else:
 				success=False
 				failure="Nada fue modificado."
-			ctx={'success':success,'lista':lista,'failure':failure}
+			ctx={'success':success,'lista':lista,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx,context_instance = RequestContext(request))
 		else:
 			seleccion = ServicioTecnico.objects.get(nombre_serv = seleccion)
-			ctx = {'lista':lista,'seleccion':seleccion}
+			ctx = {'lista':lista,'seleccion':seleccion,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx,context_instance = RequestContext(request))
 	else:
-		ctx = {'lista':lista}
+		ctx = {'lista':lista,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
 
 #### Compatibilidades------------------------------------------
 def admCompatibilidades_view(request):
-	return render_to_response('home/menuA/admCompatibilidades/index.html',context_instance=RequestContext(request))
+	return render_to_response('home/menuA/admCompatibilidades/index.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance=RequestContext(request))
 
 def agCompatibilidad_view(request):# Agregar Compatibilidad
 	lista_dispositivo = Dispositivo.objects.all()
@@ -433,7 +492,7 @@ def agCompatibilidad_view(request):# Agregar Compatibilidad
 
 		if ((dispositivo_id == '-1') or (subtipo_escogido == [])):
 			failure = "Debe elegir un dispositivo y al menos un subtipo"
-			ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'failure':failure}
+			ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 			return render_to_response('home/menuA/admCompatibilidades/agCompatibilidad.html',ctx,context_instance = RequestContext(request))
 
 		#Se selecciona el dispositivo elegido de la base de datos
@@ -451,15 +510,16 @@ def agCompatibilidad_view(request):# Agregar Compatibilidad
 				compatibilidad = Compatibilidad(dispositivo = disp, subtipo = subtipo)
 				compatibilidad.save()
 			success = "Compatibilidad(es) agregada(s) a la base de datos"
-			ctx = {'lista_compt':lista_compt,'success':success,'dispositivo_comp':dispositivo_id,'subtipo_escogido':subtipo_escogido,'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo}
+			ctx = {'lista_compt':lista_compt,'success':success,'dispositivo_comp':dispositivo_id,'subtipo_escogido':subtipo_escogido,'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 	else:
 		lista_dispositivo = Dispositivo.objects.all()
 		lista_subtipo = Subtipo.objects.all()
-		ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'lista_compt':lista_compt}
+		ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'lista_compt':lista_compt,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 	return render_to_response('home/menuA/admCompatibilidades/agCompatibilidad.html',ctx,context_instance = RequestContext(request))
 
 def elCompatibilidad_view(request):# Eliminar Compatibilidad
 	lista_dispositivo_compat = Compatibilidad.objects.all()
+	lista_subtipo = Subtipo.objects.all()
 	# lista_subtipo = Subtipo.objects.all()
 	# lista_dispositivo = Dispositivo.objects.all()
 
@@ -481,7 +541,7 @@ def elCompatibilidad_view(request):# Eliminar Compatibilidad
 
 		if (disp_elegido == '-1' or lista_subtipos == []):
 			failure = "Debe elegir subtipos compatibles para eliminar"
-			ctx = {'lista_dispositivo':lista_dispositivo,'failure':failure}
+			ctx = {'lista_dispositivo':lista_dispositivo,'failure':failure, 'lista_subtipo':lista_subtipo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 			return render_to_response('home/menuA/admCompatibilidades/elCompatibilidad.html',ctx,context_instance = RequestContext(request))
 
 		lista_subtipos_ids = []
@@ -511,9 +571,9 @@ def elCompatibilidad_view(request):# Eliminar Compatibilidad
 		for disp in lista_disp_compat:
 			lista_dispositivo.append(Dispositivo.objects.get(id = disp))	
 
-		ctx = {'lista_dispositivo':lista_dispositivo,'success':"Compatibilidad(es) eliminada(s) de la base de datos"}
+		ctx = {'lista_dispositivo':lista_dispositivo,'success':"Compatibilidad(es) eliminada(s) de la base de datos", 'lista_subtipo':lista_subtipo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 	else:
-		ctx = {'lista_dispositivo':lista_dispositivo}
+		ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 	return render_to_response('home/menuA/admCompatibilidades/elCompatibilidad.html',ctx,context_instance = RequestContext(request))
 
 def agIncompatibilidad_view(request):# Agregar Incompatibilidad
@@ -528,13 +588,12 @@ def agIncompatibilidad_view(request):# Agregar Incompatibilidad
 		#Si no se elige alguno de los dos campos
 		if (dispositivo_id == '-1' or dispositivo_incompat_ids==[]):
 			failure = "Debe elegir un dispositivo y al menos otro dispositivo con que sea incompatible"
-			ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'failure':failure}
+			ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 			return render_to_response('home/menuA/admCompatibilidades/agIncompatibilidad.html',ctx,context_instance = RequestContext(request))
 
 		else:
 			for disp in dispositivo_incompat_ids:
 				dispositivo_id2 = int(disp)
-				print "dispostivo",dispositivo_id2
 
 
 				#Obtenemos disp1 y disp2, y los registramos en la tabla incompatibilidad
@@ -543,13 +602,14 @@ def agIncompatibilidad_view(request):# Agregar Incompatibilidad
 				incompatibilidad = Incompatibilidad(dispositivo1 = disp1, dispositivo2 = disp2)
 				incompatibilidad.save()
 			success = "Incompatibilidad(es) agregada(s) a la base de datos"
-			ctx = {'success':success,'dispositivo_incomp':dispositivo_id,'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'incompatibilidad':incompatibilidad}
+			ctx = {'success':success,'dispositivo_incomp':dispositivo_id,'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'incompatibilidad':incompatibilidad,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 	else:
-		ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'incompatibilidad':incompatibilidad}
+		ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'incompatibilidad':incompatibilidad,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 	return render_to_response('home/menuA/admCompatibilidades/agIncompatibilidad.html',ctx,context_instance = RequestContext(request))
 
 def elIncompatibilidad_view(request):# Eliminar Incompatibilidad
 	lista_dispositivo_incompat = Incompatibilidad.objects.all()
+	lista_subtipo = Subtipo.objects.all()
 	lista_disp1_incompat = []
 	lista_disp2_incompat = []
 	lista_dispositivo = []
@@ -572,7 +632,7 @@ def elIncompatibilidad_view(request):# Eliminar Incompatibilidad
 
 		if (disp_elegido == '-1' or lista_disp == []):
 			failure = "Debe elegir dispositivos incompatibles para eliminar"
-			ctx = {'lista_dispositivo1':lista_dispositivo1,'failure':failure}
+			ctx = {'lista_dispositivo1':lista_dispositivo1,'failure':failure, 'lista_subtipo':lista_subtipo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 			return render_to_response('home/menuA/admCompatibilidades/elIncompatibilidad.html',ctx,context_instance = RequestContext(request))
 
 		lista_dispositivo = []
@@ -613,14 +673,14 @@ def elIncompatibilidad_view(request):# Eliminar Incompatibilidad
 			disp = Dispositivo.objects.get(id = dispo)
 			lista_dispositivo1.append(disp)
 
-		ctx = {'lista_dispositivo':lista_dispositivo,'success':"Incompatibilidad(es) eliminada(s) de la base de datos",'lista_dispositivo1':lista_dispositivo1}
+		ctx = {'lista_dispositivo':lista_dispositivo,'success':"Incompatibilidad(es) eliminada(s) de la base de datos",'lista_dispositivo1':lista_dispositivo1, 'lista_subtipo':lista_subtipo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 	else:
-		ctx = {'lista_dispositivo1':lista_dispositivo1}
+		ctx = {'lista_dispositivo1':lista_dispositivo1, 'lista_subtipo':lista_subtipo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 	return render_to_response('home/menuA/admCompatibilidades/elIncompatibilidad.html',ctx,context_instance = RequestContext(request))
 
 #### Tipos y Subtipos-------------------------------------
 def admTySubtipos_view(request):
-	return render_to_response('home/menuA/admTySubtipos/index.html',context_instance=RequestContext(request))
+	return render_to_response('home/menuA/admTySubtipos/index.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance=RequestContext(request))
 
 def agTipo_view(request):# Agregar Tipo
 	global lista_tipos
@@ -632,22 +692,26 @@ def agTipo_view(request):# Agregar Tipo
 			nuevo_nombre = formulario.cleaned_data['nombre_tipo']
 			if Tipo.objects.filter(nombre_tipo=nuevo_nombre):
 				failure="Ya existe un tipo con el nombre ingresado."
+				ctx={'agregarTipoForm':formulario,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+				return render_to_response('home/menuA/admTySubtipos/agTipo.html',ctx, context_instance = RequestContext(request))
+			if Tipo.objects.filter(nombre_tipo=nuevo_nombre):
+				failure="Ya existe un tipo con el nombre ingresado."
 				formulario = tipoForm(request.POST)
-				ctx={'agregarTipoForm':formulario,'failure':failure}
+				ctx={'agregarTipoForm':formulario,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 				return render_to_response('home/menuA/admTySubtipos/agTipo.html',ctx, context_instance = RequestContext(request))
 			nuevo_tipo = Tipo(nombre_tipo = nuevo_nombre)
 			nuevo_tipo.save()
 			nuevo_tipo_form = tipoForm()
-			ctx = {'success':success,'agregarTipoForm':nuevo_tipo_form}
+			ctx = {'success':success,'agregarTipoForm':nuevo_tipo_form,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 			return render_to_response('home/menuA/admTySubtipos/agTipo.html',ctx, context_instance = RequestContext(request))
 		else:
 			formulario = tipoForm(request.POST)
 			failure="Debe rellenar apropiadamente los datos."
-			ctx={'agregarTipoForm':formulario,'failure':failure}
+			ctx={'agregarTipoForm':formulario,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 			return render_to_response('home/menuA/admTySubtipos/agTipo.html',ctx, context_instance = RequestContext(request))
 	else:
 		formulario = tipoForm()
-		ctx={'agregarTipoForm':formulario}
+		ctx={'agregarTipoForm':formulario,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admTySubtipos/agTipo.html',ctx, context_instance = RequestContext(request))
 
 def elTipo_view(request):# Eliminar Tipo
@@ -661,30 +725,47 @@ def elTipo_view(request):# Eliminar Tipo
 			failure = False
 			eliminar_tipo = Tipo.objects.filter(id = tipoEscogido).delete()
 			success = "Tipo eliminado de la base de datos."
-		ctx= {'success':success, 'lista_tipos':lista_tipos,'failure':failure}
+		ctx= {'success':success, 'lista_tipos':lista_tipos,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admTySubtipos/elTipo.html',ctx, context_instance = RequestContext(request))
 	else:
-		ctx = {'lista_tipos':lista_tipos}
+		ctx = {'lista_tipos':lista_tipos,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admTySubtipos/elTipo.html',ctx,context_instance = RequestContext(request))
 
 def edTipo_view(request):# Editar Tipo
-	lista = ServicioTecnico.objects.all().order_by('nombre_serv')
+	lista = Tipo.objects.all().order_by('nombre_tipo')
 	if request.method == 'POST':
 		seleccion = request.POST['selec']
 		if seleccion == "":
 			success = False
-			failure = "Debe elegir el servicio a editar."
-			ctx = {'lista':lista,'failure':failure}
-			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
+			failure = "Debe elegir el tipo a editar."
+			ctx = {'lista':lista,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+			return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx, context_instance = RequestContext(request))
 		if seleccion == "seleccionado":
-			success=True
+			name = request.POST['name']
+			tipo = Tipo.objects.get(nombre_tipo=name)
+			newname = tipo.nombre_tipo
+			if request.POST['newname']:
+				if Tipo.objects.filter(nombre_tipo=request.POST['newname']):
+					failure="Ya existe un tipo con el nombre ingresado."
+					ctx={'lista':lista,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+					return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx, context_instance = RequestContext(request))
+				newname = request.POST['newname']
+			new_tipo = Tipo.objects.filter(nombre_tipo=tipo).update(nombre_tipo=newname)
+			if request.POST['newname']:
+				success="El tipo ha sido modificado."
+				failure=False
+			else:
+				success=False
+				failure="Nada fue modificado."
+			ctx={'success':success,'lista':lista,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+			return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx,context_instance = RequestContext(request))
 		else:
-			seleccion = ServicioTecnico.objects.get(nombre_serv = seleccion)
-			ctx = {'lista':lista,'seleccion':seleccion}
-			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx,context_instance = RequestContext(request))
+			seleccion = Tipo.objects.get(nombre_tipo = seleccion)
+			ctx = {'lista':lista,'seleccion':seleccion,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+			return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx,context_instance = RequestContext(request))
 	else:
-		ctx = {'lista':lista}
-		return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
+		ctx = {'lista':lista,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+		return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx, context_instance = RequestContext(request))
 
 def agSTipo_view(request):# Agregar Subtipo
 	global lista_subtipos
@@ -696,7 +777,7 @@ def agSTipo_view(request):# Agregar Subtipo
 			if Subtipo.objects.filter(nombre_subtipo=nuevo_nombre):
 				failure="Ya existe un subtipo con el nombre ingresado."
 				formulario = subtipoForm(request.POST)
-				ctx={'agregarSubtipoForm':formulario,'failure':failure,'lista_tipos':lista_tipos}
+				ctx={'agregarSubtipoForm':formulario,'failure':failure,'lista_tipos':lista_tipos,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 				return render_to_response('home/menuA/admTySubtipos/agSTipo.html',ctx, context_instance = RequestContext(request))
 			tipo_asignado = formulario.cleaned_data['tipo_padre']
 			subtipo_asignado = formulario.cleaned_data['subtipo_padre']
@@ -706,7 +787,7 @@ def agSTipo_view(request):# Agregar Subtipo
 				if tipo_asignado and subtipo_asignado:
 					failure="Debe elegir un tipo o un subtipo, no ambas."
 					formulario = subtipoForm(request.POST)
-					ctx = {'failure':failure,'agregarSubtipoForm':formulario,'lista_tipos':lista_tipos}
+					ctx = {'failure':failure,'agregarSubtipoForm':formulario,'lista_tipos':lista_tipos,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 					return render_to_response('home/menuA/admTySubtipos/agSTipo.html',ctx, context_instance = RequestContext(request))
 				#Se revisa si subtipo agregado pertenece a un tipo o a un subtipo
 				
@@ -719,21 +800,21 @@ def agSTipo_view(request):# Agregar Subtipo
 				nuevo_subtipo.save()
 				formulario = subtipoForm()
 				success = "subtipo añadido a la base de datos."
-				ctx = {'success':success,'agregarSubtipoForm':formulario,'lista_tipos':lista_tipos}
+				ctx = {'success':success,'agregarSubtipoForm':formulario,'lista_tipos':lista_tipos,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 				return render_to_response('home/menuA/admTySubtipos/agSTipo.html',ctx, context_instance = RequestContext(request))
 			else:
 				failure="Debe elegir un tipo o un subtipo padre."
 				formulario = subtipoForm(request.POST)
-				ctx = {'failure':failure,'agregarSubtipoForm':formulario,'lista_tipos':lista_tipos}
+				ctx = {'failure':failure,'agregarSubtipoForm':formulario,'lista_tipos':lista_tipos,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 				return render_to_response('home/menuA/admTySubtipos/agSTipo.html',ctx, context_instance = RequestContext(request))
 		else:
 			formulario = subtipoForm(request.POST)
 			failure="Debe rellenar apropiadamente los datos."
-			ctx = {'failure':failure,'agregarSubtipoForm':formulario,'lista_tipos':lista_tipos}
+			ctx = {'failure':failure,'agregarSubtipoForm':formulario,'lista_tipos':lista_tipos,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 			return render_to_response('home/menuA/admTySubtipos/agSTipo.html',ctx, context_instance = RequestContext(request))
 	else:
 		formulario = subtipoForm()
-		ctx ={'agregarSubtipoForm':formulario,'lista_tipos':lista_tipos}
+		ctx ={'agregarSubtipoForm':formulario,'lista_tipos':lista_tipos,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admTySubtipos/agSTipo.html',ctx,context_instance=RequestContext(request))
 
 def elSTipo_view(request):# Eliminar Subtipo
@@ -748,35 +829,52 @@ def elSTipo_view(request):# Eliminar Subtipo
 			error="holi"
 			eliminar_subtipo = Subtipo.objects.filter(id = subtipoEscogido).delete()
 			success = "Subtipo eliminado de la base de datos."
-		ctx= {'success':success, 'lista_subtipos':lista_subtipos,'failure':failure}
+		ctx= {'success':success, 'lista_subtipos':lista_subtipos,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admTySubtipos/elSTipo.html',ctx, context_instance = RequestContext(request))
 	else:
-		ctx = {'lista_subtipos':lista_subtipos}
+		ctx = {'lista_subtipos':lista_subtipos,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admTySubtipos/elSTipo.html',ctx,context_instance=RequestContext(request))
 
 def edSTipo_view(request):# Editar Subtipo
-	lista = ServicioTecnico.objects.all().order_by('nombre_serv')
+	lista = Subtipo.objects.all().order_by('nombre_subtipo')
+	lista_tipo = Tipo.objects.all()
 	if request.method == 'POST':
 		seleccion = request.POST['selec']
 		if seleccion == "":
 			success = False
-			failure = "Debe elegir el servicio a editar."
-			ctx = {'lista':lista,'failure':failure}
-			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
+			failure = "Debe elegir el subtipo a editar."
+			ctx = {'lista':lista,'lista_tipo':lista_tipo,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+			return render_to_response('home/menuA/admTySubtipos/elSTipo.html',ctx, context_instance = RequestContext(request))
 		if seleccion == "seleccionado":
-			success=True
+			name = request.POST['name']
+			subtipo = Subtipo.objects.get(nombre_subtipo=name)
+			newname = subtipo.nombre_subtipo
+			if request.POST['newname']:
+				if Subtipo.objects.filter(nombre_subtipo=request.POST['newname']):
+					failure="Ya existe un subtipo con el nombre ingresado."
+					ctx={'lista':lista,'lista_tipo':lista_tipo,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+					return render_to_response('home/menuA/admTySubtipos/edSTipo.html',ctx, context_instance = RequestContext(request))
+				newname = request.POST['newname']
+			new_tipo = Subtipo.objects.filter(nombre_subtipo=subtipo).update(nombre_subtipo=newname)
+			if request.POST['newname']:
+				success="El tipo ha sido modificado."
+				failure=False
+			else:
+				success=False
+				failure="Nada fue modificado."
+			ctx={'success':success,'lista':lista,'failure':failure,'lista_tipo':lista_tipo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+			return render_to_response('home/menuA/admTySubtipos/edSTipo.html',ctx,context_instance = RequestContext(request))
 		else:
-			seleccion = ServicioTecnico.objects.get(nombre_serv = seleccion)
-			ctx = {'lista':lista,'seleccion':seleccion}
-			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx,context_instance = RequestContext(request))
+			seleccion = Subtipo.objects.get(nombre_subtipo = seleccion)
+			ctx = {'lista':lista,'seleccion':seleccion,'lista_tipo':lista_tipo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+			return render_to_response('home/menuA/admTySubtipos/edSTipo.html',ctx,context_instance = RequestContext(request))
 	else:
-		ctx = {'lista':lista}
-		return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
-	return render_to_response('home/menuA/admTySubtipos/elSTipo.html',context_instance=RequestContext(request))
+		ctx = {'lista':lista,'lista_tipo':lista_tipo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+		return render_to_response('home/menuA/admTySubtipos/edSTipo.html',ctx, context_instance = RequestContext(request))
 
 #### Empleados---------------------------------------
 def admEmpleados_view(request):
-	return render_to_response('home/menuA/admEmpleados/index.html',context_instance=RequestContext(request))
+	return render_to_response('home/menuA/admEmpleados/index.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance=RequestContext(request))
 
 def agEmpleado_view(request):# Agregar Empleado
 	if request.method == 'POST':
@@ -794,19 +892,19 @@ def agEmpleado_view(request):# Agregar Empleado
 				else:
 					new_user = User.objects.filter(username=new_user.username).update(first_name=name,last_name=rut,email=mail,is_staff=True)
 				form = UserCreationForm()
-				ctx={'success':"Empleado añadido a la base de datos.",'form':form}
+				ctx={'success':"Empleado añadido a la base de datos.",'form':form,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 				return render_to_response('home/menuA/admEmpleados/agEmpleado.html',ctx,context_instance = RequestContext(request))
 			else:
 				form = UserCreationForm(request.POST)
-				ctx={'form': form,'failure':"Debe ingresar un rut válido con el siguiente formato: XXXXXXXX-Y."}
+				ctx={'form': form,'failure':"Debe ingresar un rut válido con el siguiente formato: XXXXXXXX-Y.",'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 				return render_to_response('home/menuA/admEmpleados/agEmpleado.html',ctx,context_instance = RequestContext(request))
 		else:
 			form = UserCreationForm(request.POST)
-			ctx={'form': form,'failure':"Ingrese los datos siguiendo las instrucciones."}
+			ctx={'form': form,'failure':"Ingrese los datos siguiendo las instrucciones.",'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 			return render_to_response('home/menuA/admEmpleados/agEmpleado.html',ctx,context_instance = RequestContext(request))
 	else:
 		form = UserCreationForm()
-		return render_to_response('home/menuA/admEmpleados/agEmpleado.html', {'form': form,},context_instance = RequestContext(request))
+		return render_to_response('home/menuA/admEmpleados/agEmpleado.html', {'form': form,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))
 
 def elEmpleado_view(request):# Editar Empleado
 	lista_empleados = User.objects.all().order_by('first_name')
@@ -819,10 +917,10 @@ def elEmpleado_view(request):# Editar Empleado
 			failure = False
 			new_user = User.objects.filter(username=empleadoEscogido).delete()
 			success = "Empleado eliminado de la base de datos."
-		ctx= {'success':success, 'lista_empleados':lista_empleados,'failure':failure}
+		ctx= {'success':success, 'lista_empleados':lista_empleados,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admEmpleados/elEmpleado.html',ctx, context_instance = RequestContext(request))
 	else:
-		ctx = {'lista_empleados':lista_empleados}
+		ctx = {'lista_empleados':lista_empleados,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admEmpleados/elEmpleado.html',ctx,context_instance = RequestContext(request))
 
 def edEmpleado_view(request):# Eliminar Empleado
@@ -847,7 +945,7 @@ def edEmpleado_view(request):# Eliminar Empleado
 				if esRut(request.POST['rut']) and  digito_verificador(numRut) == codVer:
 					rut = request.POST['rut']
 				else:
-					ctx={'failure':"Debe ingresar un rut válido con el siguiente formato: XXXXXXXX-Y.",'lista_empleados':lista_empleados}
+					ctx={'failure':"Debe ingresar un rut válido con el siguiente formato: XXXXXXXX-Y.",'lista_empleados':lista_empleados,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 					return render_to_response('home/menuA/admEmpleados/edEmpleado.html',ctx,context_instance = RequestContext(request))
 			if request.POST['mail']:
 				mail = request.POST['mail']
@@ -857,12 +955,12 @@ def edEmpleado_view(request):# Eliminar Empleado
 				new_user = User.objects.filter(username=empleadoEscogido).update(first_name=name,last_name=rut,email=mail,is_staff=True,is_superuser=False)
 			else:
 				new_user = User.objects.filter(username=empleadoEscogido).update(first_name=name,last_name=rut,email=mail,is_staff=True)
-			ctx={'success':"El empleado ha sido modificado.",'lista_empleados':lista_empleados}
+			ctx={'lista_categorias': Tipo.objects.all().order_by('nombre_tipo'),'success':"El empleado ha sido modificado.",'lista_empleados':lista_empleados}
 			return render_to_response('home/menuA/admEmpleados/edEmpleado.html',ctx,context_instance = RequestContext(request))
-		ctx= {'success':success, 'lista_empleados':lista_empleados,'failure':failure}
+		ctx= {'lista_categorias': Tipo.objects.all().order_by('nombre_tipo'),'success':success, 'lista_empleados':lista_empleados,'failure':failure}
 		return render_to_response('home/menuA/admEmpleados/edEmpleado.html',ctx, context_instance = RequestContext(request))
 	else:
-		ctx = {'lista_empleados':lista_empleados}
+		ctx = {'lista_categorias': Tipo.objects.all().order_by('nombre_tipo'),'lista_empleados':lista_empleados}
 		return render_to_response('home/menuA/admEmpleados/edEmpleado.html',ctx,context_instance = RequestContext(request))
 
 #### Asignar Armado---------------------------------------
@@ -885,7 +983,126 @@ def regServicio_view(request):
 
 
 def menuE_view(request):
-	return render_to_response('home/menuE.html',context_instance=RequestContext(request))
+	return render_to_response('home/menuE.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance=RequestContext(request))
+
+
+
+
+
+
+#################################################################################
+############   FUNCIONES EXTERNAS, NO RETORNAN NINGÚN TEMPLATE   ################
+#################################################################################
+
+#Función que consulta si el id que se le da tiene subtipos padres.
+#OJO. retorna una lista con todos los subtipos padres, donde el primer elemento es el tipo_padre!
+def padres(lista,id_subtipo):
+	lista.append(id_subtipo)	
+	query_subtipo_padre = Subtipo.objects.get(id = id_subtipo)
+
+	if query_subtipo_padre.subtipo_padre:
+		id_padre = query_subtipo_padre.subtipo_padre.id
+		lista.append(id_padre)
+		#Volvemos a ejecutar a funcion padre con el siguiente subtipo
+		return padres(lista,id_padre)
+	else:
+		lista = eliminar_duplicados(lista, idfun = None)
+		id_tipo_padre = query_subtipo_padre.tipo_padre.id
+		#Insertamos tipo_padre al principio de la lista
+		lista.insert(0,id_tipo_padre)
+		return lista
+
+#Función que elimina elementos duplicados manteniendo el orden de la valores en que fueron ingresados
+def eliminar_duplicados(seq, idfun = None): 
+   # order preserving
+   	if idfun is None:
+   	   def idfun(x): return x
+	   seen = {}
+	   result = []
+	   for item in seq:
+	       marker = idfun(item)
+	       if marker in seen: continue
+	       seen[marker] = 1
+	       result.append(item)
+	   return result
+
+
+
+####Función que retorna una lista con el objeto tipo_padre y los objetos subtipo_padre dado un subtipo.
+def encontrar_padres(id_subtipo):
+	lista_p = []
+
+	#En lista_padress_ se almacenan todos los padres del subtipo escogido
+	lista_padres = padres(lista_p, id_subtipo = id_subtipo)
+	lista_objeto_padre = []
+
+	#Invertimos la lista, para que quede en orden desde el padre mayor, al padre menor:
+	lista_padres.reverse()
+
+	tipo = Tipo.objects.get(id = lista_padres.pop(-1))
+	lista_objeto_padre.append(tipo)
+	lista_objeto_padre
+
+	#Almacenamos los objetos "subtipo" en lista_objeto_padre
+	for padre in lista_padres:
+		subtipo = Subtipo.objects.get(id = padre)
+		lista_objeto_padre.append(subtipo)
+
+	return lista_objeto_padre
+
+# lista HijosDeUnSubtipo(Subtipo X)
+# lista vacia
+# for (sub in Subtipos)
+# if (padre(sub) == X)
+# lista.add(sub)
+# return lista
+
+def hijos_directos(id_subtipo):
+	lista = []
+	lista_subtipos = Subtipo.objects.all()
+	subtipo_escogido = Subtipo.objects.get(id = id_subtipo)
+
+	for subtipo in lista_subtipos:
+		if (subtipo.subtipo_padre == subtipo_escogido):
+			lista.append(subtipo)
+	return lista
+
+
+def descendientes_de_subtipo(id_subtipo):
+	lista = []
+	lista_subtipo = Subtipo.objects.all()
+	lista_p = []
+
+	for subtipo in lista_subtipo:
+		#Considerar que el primer elemento, es el tipo. Y que todos son objetos
+		lista_padres = encontrar_padres(id_subtipo = subtipo.id)
+		#Eliminamos el tipo padre de la lista
+		lista_padres.pop(0)
+		for padre in lista_padres:
+			if (padre.id == id_subtipo):
+				lista.append(subtipo)
+	return lista
+
+# lista DescendientesDeUnSubTipo(Subtipo X)
+	# lista vacia
+	# for (sub in Subtipos)
+		# for (padreSub in sub.padres)
+		# if (padreSub == X)
+			# lista.add(sub)
+			# return lista
+
+
+
+# #Si retorna None, no tiene subtipo padre
+# def subt_padre(id_subtipo):
+# 	subtipo = Subtipo.objects.get(id = id_subtipo)
+
+# 	if subtipo.subtipo_padre:
+# 		print "subtipo padre ",subtipo.subtipo_padre
+# 		id_padre = subtipo.subtipo_padre.id
+# 		return id_padre
+# 	else:
+# 		return None
 
 
 

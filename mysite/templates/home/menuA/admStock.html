@@ -3,10 +3,52 @@
 {% block aSto %}class="active"{% endblock %}
 
 {% block menuAdministrador %}
-<h4 class="btn btn-block disabled"><i class="icon-th-large"></i> Administrar Stock</h4><br><br>
-<ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Aumentar Stock</b></a></li></ul>
 
-<form class="well">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+{{ stockForm.media}}
+
+<h4 class="btn btn-block disabled"><i class="icon-th-large"></i> Administrar Stock</h4><br><br>
+<ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Ingresar Stock</b></a></li></ul>
+
+<form action="." method="POST">
+	<table class="table table-bordered">
+		<tr><th><label>Dispositivo:</label></th>
+		<td><div id="box-disp-1" class="side-by-side clearfix">
+		        <select id = "id-dispositivo" data-placeholder="Escoja un dispositivo" class="chosen-select" style="width:350px;" name = "disp">
+		            <option value=""></option>
+		            {% for subtipo in lista_sub %}
+		                <optgroup label="{{ subtipo.nombre_subtipo }}">
+		                {% for dispositivo in lista_disp %}
+		                     {% if dispositivo.subtipo_disp == subtipo %}
+		                    <option value="{{ dispositivo.id }}">{{ dispositivo.nombre_produc }}</option>
+		                    {% endif %}
+		                {% endfor %}
+		                </optgroup> 
+		             {% endfor %}
+		        </select>
+		</div></td></tr>
+		{{ stockForm }}
+	</table>
+	{% csrf_token %}
+    <input type="submit" class="btn btn-success" name="submit" style="font-weight:bold;" value="Agregar">
 </form>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+<script src="/media/js/jquery.min.js"></script>
+<script src="/media/js/plugins.js" type="text/javascript" charset="utf-8"></script>
+<script src="/media/chosen/chosen.jquery.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+	var config = {
+	  '.chosen-select'           : {},
+	  '.chosen-select-deselect'  : {allow_single_deselect:true},
+	  '.chosen-select-no-single' : {disable_search_threshold:10},
+	  '.chosen-select-no-results': {no_results_text:'No se encontró nada!'},
+	  '.chosen-select-width'     : {width:"95%"}
+	}
+	for (var selector in config) {
+	  $(selector).chosen(config[selector]);
+	}
+</script>
 
 {% endblock %}

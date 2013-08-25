@@ -5,6 +5,7 @@ from mysite.apps.forms import registroUsuario
 urlpatterns = patterns('mysite.apps.views',
 	url(r'^$','index_view', name='index'),
     url(r'^home/$','index_view', name='index'),
+    url(r'^categorias/$','categorias_view', name='categorias'),
 
     #url(r'^menuA//$','_view',name=''),
 

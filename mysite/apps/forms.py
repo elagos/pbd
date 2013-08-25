@@ -22,7 +22,7 @@ class registroUsuario(forms.Form):
 class dispositivoForm(forms.ModelForm):
 	class Meta:
 		model = Dispositivo
-		exclude = ('destacado','cantidad_disp')
+		exclude = ('cantidad_disp')
 
 class servicioForm(forms.ModelForm):
 	class Meta:
@@ -44,7 +44,7 @@ class subtipoForm(forms.ModelForm):
 class abastecimientoForm(forms.ModelForm):
 	class Meta:
 		model = Abastecimiento
-		#exclude = ('producto_abast')
+		exclude = ('producto_abast')
 		opcionesFecha = {
 			'format': 'dd/mm/yyyy HH:ii P',
 			'autoclose': 'true',
