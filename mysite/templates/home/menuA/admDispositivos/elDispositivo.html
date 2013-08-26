@@ -1,33 +1,35 @@
 {% extends 'home/menuA/admDispositivos.html' %}
 
 {% block contenidoaDis %}
-<!-- DJANGO.CHOSEN -->
-    <!-- <link rel="stylesheet" href="/media/chosen/docsupport/style.css"> -->
-    <!-- <link rel="stylesheet" href="/media/chosen/docsupport/prism.css"> -->
-    <link rel="stylesheet" href="/media/chosen/chosen.css">
 
 <ul class="nav nav-pills nav-stacked"><li class="active"><a><b>Eliminar Dispositivo</b></a></li></ul>
 
-<form action="." method="POST">
-    {% if lista_dispositivo %}
-    <p>Producto a eliminar:</p>
-    <select data-placeholder="Seleccione dispositivo" class="chosen-select" style="width:250px;" name="disp_elegido">
-        <option value=""></option>
-        {% for subtipo in lista_subtipo %}
-        <optgroup label="{{ subtipo.nombre_subtipo }}">
-            {% for dispositivo in lista_dispositivo %}
-                {% if dispositivo.subtipo_disp == subtipo %}
-                <option value="{{ dispositivo.id }}">{{ dispositivo.nombre_produc }}</option>
-                {% endif %}
+{% if lista_dispositivo %}
+  <form action="." method="POST">
+    <table class="table table-bordered">
+      <tr><th><label for="id_p">Producto:</label></th>
+        <td><select id="id_p" data-placeholder="Seleccione dispositivo" class="chosen-select" style="width:250px;" name="disp_elegido">
+            <option value=""></option>
+            {% for subtipo in lista_subtipo %}
+            <optgroup label="{{ subtipo.nombre_subtipo }}">
+                {% for dispositivo in lista_dispositivo %}
+                    {% if dispositivo.subtipo_disp == subtipo %}
+                    <option value="{{ dispositivo.id }}">{{ dispositivo.nombre_produc }}</option>
+                    {% endif %}
+                {% endfor %}
+            </optgroup> 
             {% endfor %}
-        </optgroup> 
-        {% endfor %}
-    </select>
-    {% endif %}
-    {% csrf_token %}
-    <br><br>
+        </select></td></tr>
+      {% csrf_token %}
+    </table>
     <input type="submit" class="btn btn-success" name="submit" style="font-weight:bold;" value="Eliminar">
-</form>
+  </form>
+{% else %}
+    <div class="alert alert-danger">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <strong><i class="icon-warning-sign"></i> Atencion!</strong> No hay dispositivos en la base de datos.
+    </div>
+{% endif %}
 
 <a class="btn btn-warning pull-right" href="/menuA/admDispositivos/#menu" role="button"><i class="icon-chevron-left icon-white"></i> <b>Atrás</b></a>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br>

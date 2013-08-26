@@ -22,16 +22,24 @@ Para cambiar tambien objetos relacionados, como nombre subtipos, se debe usar se
 Buscarlo en "making queries"
 """
 
+
+
+########################## Home ###############################
+############------------------------------------###############
 def index_view(request):
-	ctx = {'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+	productos = Producto.objects.all()
+	for prod in productos:
+		print prod.destacado
+	ctx = {'lista_categorias': Tipo.objects.all().order_by('nombre_tipo'),'lista_dispositivo':Producto.objects.filter(destacado='True')}
 	return render_to_response('home/index.html',ctx,context_instance=RequestContext(request))
 
 def categorias_view(request):
 	if request.method == 'POST':
 		subtipo = int(request.POST['subtipo'])
+		if subtipo == -1:
+			return HttpResponseRedirect("/home/")
 		categoria = request.POST['categoria']
 		lista_subtipo = Subtipo.objects.all().order_by('nombre_subtipo')
-
 		lista_dispositivo = []
 		#Conseguimos los dispositivos de ese subtipo
 		lista_dispos = Dispositivo.objects.filter(subtipo_disp = subtipo)
@@ -52,28 +60,68 @@ def categorias_view(request):
 				dispositivo = Dispositivo.objects.filter(subtipo_disp = elemento)
 				for disp in dispositivo:
 					lista_dispositivo.append(disp)
-		
 		ctx = {'lista_subtipo':lista_subtipos_hijos,'lista_dispositivo':lista_dispositivo,'nombre':nombre,'lista_subtipos_hijos':lista_subtipos_hijos,'categoria':categoria,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/categorias.html',ctx, context_instance = RequestContext(request))
-
 	if request.method == 'GET':
 		if 'tipo' in request.GET:
 			nombre = request.GET['tipo']
-			tipo = Tipo.objects.get(nombre_tipo= nombre)
-			nombre = tipo.nombre_tipo
-			lista_subtipos_hijos = Subtipo.objects.filter(tipo_padre = tipo)
-			lista_dispositivo = []
-			categoria = nombre
-			for subtipo in lista_subtipos_hijos:
-				hijos = descendientes_de_subtipo(subtipo.id)
-				for elemento in hijos:
-					dispositivo = Dispositivo.objects.filter(subtipo_disp = elemento)
-					for disp in dispositivo:
-						lista_dispositivo.append(disp)
-
-			ctx = {'lista_dispositivo':lista_dispositivo,'lista_subtipos_hijos':lista_subtipos_hijos,'nombre':nombre,'categoria':categoria,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
-			return render_to_response('home/categorias.html',ctx, context_instance = RequestContext(request))
+			if Tipo.objects.filter(nombre_tipo= nombre):
+				tipo = Tipo.objects.get(nombre_tipo= nombre)
+				nombre = tipo.nombre_tipo
+				lista_subtipos_hijos = Subtipo.objects.filter(tipo_padre = tipo)
+				lista_dispositivo = []
+				categoria = nombre
+				for subtipo in lista_subtipos_hijos:
+					hijos = descendientes_de_subtipo(subtipo.id)
+					for elemento in hijos:
+						dispositivo = Dispositivo.objects.filter(subtipo_disp = elemento)
+						for disp in dispositivo:
+							lista_dispositivo.append(disp)
+				ctx = {'lista_dispositivo':lista_dispositivo,'lista_subtipos_hijos':lista_subtipos_hijos,'nombre':nombre,'categoria':categoria,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+				return render_to_response('home/categorias.html',ctx, context_instance = RequestContext(request))
 	return HttpResponseRedirect("/home/")
+
+def search_view(request):
+	if request.method == 'POST':
+		nombre = request.POST['q']
+		orden = int(request.POST['orden'])
+		direcc = int(request.POST['direcc'])
+		if orden==3 and direcc==1:
+			lista_dispositivo=Dispositivo.objects.filter(nombre_produc__icontains=nombre).order_by('precio_disp')
+		if orden==3 and direcc==2:
+			lista_dispositivo=Dispositivo.objects.filter(nombre_produc__icontains=nombre).order_by('-precio_disp')
+		if orden==2 and direcc==1:
+			lista_dispositivo=Dispositivo.objects.filter(nombre_produc__icontains=nombre).order_by('marca_disp')
+		if orden==2 and direcc==2:
+			lista_dispositivo=Dispositivo.objects.filter(nombre_produc__icontains=nombre).order_by('-marca_disp')
+		if (orden==-1 or orden==1) and direcc==1:
+			lista_dispositivo=Dispositivo.objects.filter(nombre_produc__icontains=nombre).order_by('nombre_produc')
+		if (orden==-1 or orden==1) and direcc==2:
+			lista_dispositivo=Dispositivo.objects.filter(nombre_produc__icontains=nombre).order_by('-nombre_produc')
+		ctx={'q':nombre,'lista_dispositivo':lista_dispositivo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+		return render_to_response('home/busqueda.html',ctx,context_instance=RequestContext(request))
+	if request.method == 'GET':
+		if 'q' in request.GET:
+				nombre = request.GET['q']
+				if nombre:
+					lista_dispositivo=Dispositivo.objects.filter(nombre_produc__icontains=nombre)
+					ctx={'q':nombre,'lista_dispositivo':lista_dispositivo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+					return render_to_response('home/busqueda.html',ctx,context_instance=RequestContext(request))
+	return HttpResponseRedirect("/home/")
+
+def dispositivo_view(request):
+	if request.method == 'GET':
+		if 'd' in request.GET:
+				nombre = request.GET['d']
+				if nombre:
+					if Dispositivo.objects.filter(nombre_produc=nombre):
+						disp=Dispositivo.objects.get(nombre_produc=nombre)
+						ctx={'disp':disp,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+						return render_to_response('home/dispositivo.html',ctx,context_instance=RequestContext(request))
+	return render_to_response('home.html',context_instance=RequestContext(request))
+############------------------------------------###############
+########################## Home ###############################
+
 
 
 #def _view(request):
@@ -248,7 +296,7 @@ def carrito_view(request):
 ################## Menu Administrador ######################
 ##########------------------------------------##############
 def menuA_view(request):
-	return render_to_response('home/menuA/admStock.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))# Fin Menu Administrador
+	return HttpResponseRedirect("/menuA/admStock/")
 
 def admStock_view(request):
 	lista_dispositivo = Dispositivo.objects.all()
@@ -256,7 +304,7 @@ def admStock_view(request):
 	if request.method == 'POST':
 		if not request.POST['disp']:
 			stockForm = abastecimientoForm() 
-			ctx = {'failure':"Asegurese de ingresar bien los datos",'stockForm':stockForm,'lista_sub':lista_subtipo,'lista_disp':lista_dispositivo}
+			ctx = {'lista_categorias': Tipo.objects.all().order_by('nombre_tipo'),'failure':"Asegurese de ingresar bien los datos",'stockForm':stockForm,'lista_sub':lista_subtipo,'lista_disp':lista_dispositivo}
 			return render_to_response('home/menuA/admStock.html',ctx,context_instance=RequestContext(request))
 		formulario = abastecimientoForm(request.POST)
 		if formulario.is_valid():
@@ -278,7 +326,7 @@ def admStock_view(request):
 			update_cantidad.cantidad_disp = nueva_cantidad
 			update_cantidad.save()
 			disp_nueva_cant = Dispositivo.objects.get(id = producto_id)
-			ctx = {'success':"La base de datos ha sido actualizada",'stockForm':stockForm,'lista_sub':lista_subtipo,'lista_disp':lista_dispositivo}
+			ctx = {'lista_categorias': Tipo.objects.all().order_by('nombre_tipo'),'success':"La base de datos ha sido actualizada",'stockForm':stockForm,'lista_sub':lista_subtipo,'lista_disp':lista_dispositivo}
 		else:
 			stockForm = abastecimientoForm() 
 			ctx = {'failure':"Asegurese de ingresar bien los datos",'stockForm':stockForm,'lista_sub':lista_subtipo,'lista_disp':lista_dispositivo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
@@ -304,9 +352,10 @@ def agDispositivo_view(request):# Agregar Dispositivo
 			subtipo = formulario.cleaned_data['subtipo_disp']
 			precio = formulario.cleaned_data['precio_disp']
 			descripcion = formulario.cleaned_data['descrip_disp']
+			destacado = formulario.cleaned_data['destacado']
 			imagen = formulario.cleaned_data['imagen_disp']
 			marca = formulario.cleaned_data['marca_disp']
-			nuevo_dispositivo = Dispositivo(nombre_produc = nombre, subtipo_disp = subtipo,destacado = False, cantidad_disp = 0,precio_disp = precio,imagen_disp=imagen, descrip_disp = descripcion, marca_disp = marca)
+			nuevo_dispositivo = Dispositivo(nombre_produc = nombre, subtipo_disp = subtipo,destacado = destacado, cantidad_disp = 0,precio_disp = precio,imagen_disp=imagen, descrip_disp = descripcion, marca_disp = marca)
 			nuevo_dispositivo.save()
 			formulario = dispositivoForm()
 			success = "Dispositivo añadido a la base de datos."
@@ -324,28 +373,93 @@ def agDispositivo_view(request):# Agregar Dispositivo
 
 def elDispositivo_view(request):# Eliminar Dispositivo
 	lista_dispositivo = Dispositivo.objects.all().order_by('nombre_produc')
-	lista_subtipo = Subtipo.objects.all()
+	lista_subtipo = Subtipo.objects.all().order_by('nombre_subtipo')
 	if request.method == 'POST':
 		dispositivoEscogido = request.POST['disp_elegido']
-		eliminar_dispositivo = Dispositivo.objects.filter(id = dispositivoEscogido).delete()
-		success = "Dispositivo eliminado de la base de datos."
-		ctx= {'success':success, 'lista_dispositivo':lista_dispositivo,'lista_subtipo':lista_subtipo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+		if dispositivoEscogido == "":
+			failure = "Debe elegir el servicio a eliminar."
+			success = False
+		else:
+			failure = False
+			success = "Dispositivo eliminado de la base de datos."
+			eliminar_dispositivo = Dispositivo.objects.filter(id = dispositivoEscogido).delete()
+		ctx= {'success':success,'failure':failure,'lista_dispositivo':lista_dispositivo,'lista_subtipo':lista_subtipo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admDispositivos/elDispositivo.html',ctx,context_instance=RequestContext(request))
 	else:
 		ctx = {'lista_subtipo':lista_subtipo,'lista_dispositivo':lista_dispositivo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admDispositivos/elDispositivo.html',ctx,context_instance=RequestContext(request))
 
+		id_disp = int(request.POST['id_dispositivo'])
+		formulario = dispositivoForm(instance = Dispositivo.objetcs.get(id = id_disp))
+
 def edDispositivo_view(request):# Editar Dispositivo
-	lista = Dispositivo.objects.all()
-	if (request.method=='POST'):
-		id_dispositivo = int(request.POST['id_dispositivo'])
-		datos_dispositivo = Dispositivo.objects.get(id = id_dispositivo)
-		formulario = dispositivoForm(instance = datos_dispositivo)
-		ctx = {'editarDispositivo':formulario, 'id_dispositivo':id_dispositivo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+	lista = Dispositivo.objects.all().order_by('nombre_produc')
+	lista_subtipo = Subtipo.objects.all().order_by('nombre_subtipo')
+	if request.method == 'POST':
+		seleccion = request.POST['selec']
+		if seleccion == "":
+			success = False
+			failure = "Debe elegir el dispositivo a editar."
+			ctx = {'lista':lista,'lista_subtipo':lista_subtipo,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+			return render_to_response('home/menuA/admDispositivos/edDispositivo.html',ctx, context_instance = RequestContext(request))
+		if seleccion == "seleccionado":
+			name = request.POST['oldname']
+			dispositivo = Dispositivo.objects.get(nombre_produc=name)
+			formulario = dispositivoForm(request.POST,request.FILES)
+			nombre = dispositivo.nombre_produc
+			subtipo = dispositivo.subtipo_disp
+			precio = dispositivo.precio_disp
+			descripcion = dispositivo.descrip_disp
+			destacado = dispositivo.destacado
+			imagen = dispositivo.imagen_disp
+			marca = dispositivo.marca_disp
+			cambio=False
+			if nombre != request.POST['nombre_produc']:
+				if Dispositivo.objects.filter(nombre_produc=request.POST['nombre_produc']):
+					failure="Ya existe un dispositivo con el nombre ingresado."
+					ctx={'agregarDispositivoForm':formulario,'lista_subtipo':lista_subtipo,'lista':lista,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+					return render_to_response('home/menuA/admDispositivos/edDispositivo.html',ctx, context_instance = RequestContext(request))
+				nombre = request.POST['nombre_produc']
+				cambio=True
+			if subtipo != request.POST['subtipo_disp']:
+				subtipo = request.POST['subtipo_disp']
+				cambio=True
+			if precio !=request.POST['precio_disp']:
+				precio = request.POST['precio_disp']
+				cambio=True
+			if descripcion !=request.POST['descrip_disp']:
+				descripcion = request.POST['descrip_disp']
+				cambio=True
+			if destacado !=request.POST['destacado']:
+				destacado = request.POST['destacado']
+				cambio=True
+			try:
+				if request.POST['imagen_disp']:
+					imagen = request.POST['imagen_disp']
+					cambio=True
+			except:
+				holi="holi"
+			if marca !=request.POST['marca_disp']:
+				marca = request.POST['marca_disp']
+				cambio=True
+			new_dispositivo = Dispositivo.objects.filter(nombre_produc=dispositivo).update(nombre_produc = nombre, subtipo_disp = subtipo,destacado = destacado, cantidad_disp = 0,precio_disp = precio,imagen_disp=imagen, descrip_disp = descripcion, marca_disp = marca)
+			if cambio:
+				success="El dispositivo ha sido modificado."
+				failure=False
+			else:
+				success=False
+				failure="Nada fue modificado."
+			ctx={'success':success,'failure':failure,'lista_subtipo':lista_subtipo,'lista':lista,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+			return render_to_response('home/menuA/admDispositivos/edDispositivo.html',ctx,context_instance = RequestContext(request))
+		else:
+			seleccion = Dispositivo.objects.get(nombre_produc = seleccion)
+			id_disp = seleccion.id
+			formulario = dispositivoForm(instance = Dispositivo.objects.get(id = id_disp))
+			ctx = {'lista':lista,'lista_subtipo':lista_subtipo,'seleccion':seleccion,'editarDispositivoForm':formulario,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+			return render_to_response('home/menuA/admDispositivos/edDispositivo.html',ctx,context_instance = RequestContext(request))
 	else:
-		mensaje = "Hubo un problema al intentar la solicitud. Intente nuevamente. Si el problema persiste, contáctese con el administrador"
-		ctx = {'mensaje': mensaje,'lista':lista,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
-	return render_to_response('home/menuA/admDispositivos/edDispositivo.html', ctx, context_instance = RequestContext(request))
+		ctx = {'lista':lista,'lista_subtipo':lista_subtipo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+		return render_to_response('home/menuA/admDispositivos/edDispositivo.html',ctx, context_instance = RequestContext(request))
 
 #### Equipos Armados-------------------------------------
 def admEArmados_view(request):
@@ -358,23 +472,6 @@ def elEquipo_view(request):# Eliminar Equipo
 	return render_to_response('home/menuA/admEArmados/elEquipo.html',context_instance=RequestContext(request))
 
 def edEquipo_view(request):# Editar Equipo
-	lista = ServicioTecnico.objects.all().order_by('nombre_serv')
-	if request.method == 'POST':
-		seleccion = request.POST['selec']
-		if seleccion == "":
-			success = False
-			failure = "Debe elegir el servicio a editar."
-			ctx = {'lista':lista,'failure':failure}
-			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
-		if seleccion == "seleccionado":
-			success=True
-		else:
-			seleccion = ServicioTecnico.objects.get(nombre_serv = seleccion)
-			ctx = {'lista':lista,'seleccion':seleccion}
-			return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx,context_instance = RequestContext(request))
-	else:
-		ctx = {'lista':lista}
-		return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
 	return render_to_response('home/menuA/admEArmados/edEquipo.html',context_instance=RequestContext(request))
 
 #### Servicios Técnicos------------------------------------------
@@ -690,6 +787,7 @@ def agTipo_view(request):# Agregar Tipo
 		if formulario.is_valid():
 			success = "Tipo añadido a la base de datos."
 			nuevo_nombre = formulario.cleaned_data['nombre_tipo']
+			si_no_armado = formulario.cleaned_data['armado_equipo']
 			if Tipo.objects.filter(nombre_tipo=nuevo_nombre):
 				failure="Ya existe un tipo con el nombre ingresado."
 				ctx={'agregarTipoForm':formulario,'failure':failure,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
@@ -742,6 +840,7 @@ def edTipo_view(request):# Editar Tipo
 			return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx, context_instance = RequestContext(request))
 		if seleccion == "seleccionado":
 			name = request.POST['name']
+			armado = request.POST['armado_equipo']
 			tipo = Tipo.objects.get(nombre_tipo=name)
 			newname = tipo.nombre_tipo
 			if request.POST['newname']:
@@ -751,7 +850,8 @@ def edTipo_view(request):# Editar Tipo
 					return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx, context_instance = RequestContext(request))
 				newname = request.POST['newname']
 			new_tipo = Tipo.objects.filter(nombre_tipo=tipo).update(nombre_tipo=newname)
-			if request.POST['newname']:
+			new_choice = Tipo.objects.filter(nombre_tipo=tipo).update(armado_equipo=armado)
+			if name and armado:
 				success="El tipo ha sido modificado."
 				failure=False
 			else:
@@ -1168,8 +1268,6 @@ def ajax_validar_disp_diferente_comp(request):
 			
 			for elemento in query_compatibles_previos:
 				lista_subtipos_compatibles.append(elemento.subtipo.id)
-
-			print lista_subtipos_compatibles
 			ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo, 'lista_subtipos_compatibles':lista_subtipos_compatibles}
 			return render_to_response('ajax/validar_dispositivo_diferente_comp.html',ctx,context_instance = RequestContext(request))
 		else:
@@ -1204,9 +1302,6 @@ def ajax_listar_incompatibilidad(request):
 		lista_disp_incompatibles = []
 		query_incompat1 = Incompatibilidad.objects.filter(dispositivo1 = dispositivo)
 		query_incompat2 = Incompatibilidad.objects.filter(dispositivo2 = dispositivo)
-
-		print query_incompat1
-		print query_incompat2
 
 		#Lista que almacena todos los ids de dispositivos2 incompatibles con dispositivo escogido
 		lista_disp_incompat1 = []

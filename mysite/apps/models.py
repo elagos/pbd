@@ -9,6 +9,13 @@ CHOICES = (
     (False, "No")
 )
 
+SI_NO_NULL = (
+	(u'si',u'Si, obligatoria'),
+    (u'no',u'Si, pero no es obligatoria'),
+    (u'nunca',u'No se arman equipos con este tipo')
+)
+
+
 #Tabla Productos
 class Producto(models.Model):
 	nombre_produc = models.CharField("nombre producto",max_length = 200, blank = False)
@@ -35,6 +42,7 @@ class EquipoArmado(Producto):
 
 class Tipo(models.Model):
 	nombre_tipo = models.CharField("nombre tipo",max_length = 100, blank = False)
+	armado_equipo = models.CharField("¿Se arman equipos con este categoría?",max_length = 10, choices = SI_NO_NULL)
 
 	def __unicode__(self):
 		return self.nombre_tipo

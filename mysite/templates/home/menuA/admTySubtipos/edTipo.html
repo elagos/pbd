@@ -10,6 +10,29 @@
                 <tr><th>Nombre:<input hidden name="selec" value="seleccionado"><input hidden name="name" value="{{ seleccion.nombre_tipo }}"></th>
                 <td>{{ seleccion.nombre_tipo }}</td></tr>
                 <tr><th><label for="id_1">Nuevo Nombre:</label></th><td><input id="id_1" type="text" placeholder="{{ seleccion.nombre_tipo }}" name="newname"/></td></tr>
+                <tr><th><label for="id_1">¿Se arman equipos con este categoría?</label></th><td><select id="id_armado_equipo" name="armado_equipo">
+                    {% if seleccion.armado_equipo %}
+                        {%if seleccion.armado_equipo == "no"%}
+                        <option value="si">Si, obligatoria</option>
+                        <option value="no" selected="selected">Si, pero no es obligatoria</option>
+                        <option value="nunca">No se arman equipos con este tipo</option>
+                        {% endif %}
+                        {%if seleccion.armado_equipo == "si"%}
+                        <option value="si" selected="selected">Si, obligatoria</option>
+                        <option value="no" >Si, pero no es obligatoria</option>
+                        <option value="nunca">No se arman equipos con este tipo</option>
+                        {% endif %}
+                        {%if seleccion.armado_equipo == "nunca"%}
+                        <option value="si">Si, obligatoria</option>
+                        <option value="no">Si, pero no es obligatoria</option>
+                        <option value="nunca"selected="selected">No se arman equipos con este tipo</option>
+                        {% endif %}
+                    {% else %}
+                        <option value="nunca">No se arman equipos con este tipo</option>
+                        <option value="no">Si, pero no es obligatoria</option>
+                        <option value="si">Si, obligatoria</option>
+                    {% endif %}
+                    </select></td></tr>
             {% else %}
                 <tr><th><label>Nombre:</label></th>
                 <td><select name = "selec">

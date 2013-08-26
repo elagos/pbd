@@ -15,55 +15,22 @@
 <span id="menu" class="span9"><h2 style="text-align:center;">Productos Destacados</h2></span><br><br><br><br><br><br>
 
 
-<ul class="thumbnails" style="text-align:center;">
-	<li class="">
-    <div class="thumbnail">
-      <img src="http://images2.wikia.nocookie.net/__cb20120801131931/leagueoflegends/images/2/28/RyzeSquare.png" alt="">
-      <h3>Producto X</h3>
-      <p>Precio: $0</p>
-    </div>
-  </li>
-  <li class="">
-    <div class="thumbnail">
-      <img src="http://images2.wikia.nocookie.net/__cb20120801131931/leagueoflegends/images/2/28/RyzeSquare.png" alt="">
-      <h3>Producto X</h3>
-      <p>Precio: $0</p>
-    </div>
-  </li>
-  <li class="">
-    <div class="thumbnail">
-      <img src="http://images2.wikia.nocookie.net/__cb20120801131931/leagueoflegends/images/2/28/RyzeSquare.png" alt="">
-      <h3>Producto X</h3>
-      <p>Precio: $0</p>
-    </div>
-  </li>
-  <li class="">
-    <div class="thumbnail">
-      <img src="http://images2.wikia.nocookie.net/__cb20120801131931/leagueoflegends/images/2/28/RyzeSquare.png" alt="">
-      <h3>Producto X</h3>
-      <p>Precio: $0</p>
-    </div>
-  </li>
-  <li class="">
-    <div class="thumbnail">
-      <img src="http://images2.wikia.nocookie.net/__cb20120801131931/leagueoflegends/images/2/28/RyzeSquare.png" alt="">
-      <h3>Producto X</h3>
-      <p>Precio: $0</p>
-    </div>
-  </li>
-  <li class="">
-    <div class="thumbnail">
-      <img src="http://images2.wikia.nocookie.net/__cb20120801131931/leagueoflegends/images/2/28/RyzeSquare.png" alt="">
-      <h3>Producto X</h3>
-      <p>Precio: $0</p>
-    </div>
-  </li>
-  <li class="">
-    <div class="thumbnail">
-      <img src="http://images2.wikia.nocookie.net/__cb20120801131931/leagueoflegends/images/2/28/RyzeSquare.png" alt="">
-      <h3>Producto X</h3>
-      <p>Precio: $0</p>
-    </div>
-  </li>  
-</ul>
+{% if lista_dispositivo %}
+  <br>
+  <ul class="thumbnails" style="text-align:center;">
+     {% for dispositivo in lista_dispositivo %}
+     <li class="">
+          <div class="thumbnail">
+            <a href="/dispositivo/?d={{ dispositivo.nombre_produc }}"><img border="2" src="{{ MEDIA_URL }}/{{ dispositivo.imagen_disp }}" alt="dispositivo.nombre_produc"/></a>
+            <a href="/dispositivo/?d={{ dispositivo.nombre_produc }}"><h3>{{  dispositivo.nombre_produc }}</h3></a>
+            <p>Precio: {{ dispositivo.precio_disp }}</p>
+            <p>Marca: {{ dispositivo.marca_disp }}</p>
+          </div>
+      </li>
+      {% endfor %}
+  </ul>
+{% else %}
+  <br><br><br>
+  <p class="muted offset2">No hay productos destacados en este momento.</p>
+{% endif %}
 {% endblock %}

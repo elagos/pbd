@@ -1,0 +1,32 @@
+{% extends 'template.html' %}
+{% block title %} {{disp.nombre_produc}} | Chipset Management {% endblock %}
+
+{% block barraSuperior %}
+<div class="breadcrumb" style="background-color:white;">
+  <li><a href="{% url 'index' %}">Home</a><span class="divider">|</span></li>
+  <li><a href="#">Servicios</a><span class="divider">|</span></li>
+  <li><a href="#">Noticias</a><span class="divider">|</span></li>
+  <li><a href="#">Promociones</a><span class="divider">|</span></li>
+  <li><a href="https://www.facebook.com/pages/radal-computacion/122875447789596">Faceboook</a></li>
+</div>
+{% endblock %}
+
+{% block contenido %}
+<span id="menu" class="span9"><h2 style="text-align:center;">{{disp.nombre_produc}}</h2></span><br><br><br><br><br><br>
+
+
+<br>
+<div class="offset2 span5">
+  <table class="table table-bordered">
+    <tr><div class="offset1"><img border="2" src="{{ MEDIA_URL }}/{{ disp.imagen_disp }}" style="text-align:center;" alt="disp.nombre_produc"/></div></tr>
+    <tr><th>Nombre:</th><td>{{  disp.nombre_produc }}</td></tr>
+    <tr><th>Marca:</th><td>{{ disp.marca_disp }}</td></tr>
+    <tr><th>Precio:</th><td>{{ disp.precio_disp }}</td></tr>
+    <tr><th>Sub-Categoria:</th><td>{{ disp.subtipo_disp }}</td></tr>
+    <tr><th>Disponibilidad:</th><td>{{ disp.cantidad_disp }}</td></tr>
+    <tr><th>Descripción:</th><td>{{ disp.descrip_disp }}</td></tr>
+  </table>
+  <a class="btn btn-warning" href="" role="button"><b>Agregar al armado</b></a>
+  <a class="btn btn-success pull-right" href="" role="button"><b>Agregar al carrito</b></a>
+</div>
+{% endblock %}

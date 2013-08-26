@@ -6,6 +6,8 @@ urlpatterns = patterns('mysite.apps.views',
 	url(r'^$','index_view', name='index'),
     url(r'^home/$','index_view', name='index'),
     url(r'^categorias/$','categorias_view', name='categorias'),
+    url(r'^search/$','search_view', name='search'),
+    url(r'^dispositivo/$','dispositivo_view', name='dispositivo'),
 
     #url(r'^menuA//$','_view',name=''),
 

@@ -1,9 +1,9 @@
 {% extends 'template.html' %}
-{% block title %} Inicio | Chipset Management {% endblock %}
+{% block title %} Categorías | Chipset Management {% endblock %}
 
 {% block barraSuperior %}
 <div class="breadcrumb" style="background-color:white;">
-  <li class="active">Home<span class="divider">|</span></li>
+  <li><a href="{% url 'index' %}">Home</a><span class="divider">|</span></li>
   <li><a href="#">Servicios</a><span class="divider">|</span></li>
   <li><a href="#">Noticias</a><span class="divider">|</span></li>
   <li><a href="#">Promociones</a><span class="divider">|</span></li>
@@ -12,38 +12,46 @@
 {% endblock %}
 
 {% block contenido %}
-<span id="menu" class="span9"><h2 style="text-align:center;">Categorias: {{ nombre }}</h2></span><br><br><br><br><br><br>
-<p class="muted offset3">{{ categoria }}</p>
+<span id="menu" class="span9"><h2 style="text-align:center;">Categorías: "{{ nombre }}"</h2></span><br><br><br>
+<em class="muted offset3">{{ categoria }}</em><br><br>
+
 
 
 {% if lista_subtipos_hijos %}
 <div class="offset2">
     <form action="." method="POST">
         <select name = "subtipo" class="chosen-select" data-placeholder = "Escoga subtipo a filtrar"  style="width:350px;">
+            <option value="-1"></option>
             {% for subtipo in lista_subtipos_hijos %}
                 <option value = "{{ subtipo.id }}">{{ subtipo.nombre_subtipo }}</option>
             {% endfor %}
 
         </select>
         <input type="hidden" value = "{{ categoria }}" name="categoria">
-            {% csrf_token %}
-        <input type="submit" name="submit" value="Filtrar">
+        {% csrf_token %}
+        <input type="submit" class="btn btn-inverse btn-small" name="submit" value="Filtrar">
     </form><br>
 </div>
 {% endif %}
 
-<ul class="thumbnails" style="text-align:center;">
-   {% for dispositivo in lista_dispositivo %}
-   <li class="">
-        <div class="thumbnail">
-          <img border="2" src="{{ MEDIA_URL }}/{{ dispositivo.imagen_disp }}" alt="dispositivo.nombre_produc"/>
-          <h3>{{  dispositivo.nombre_produc }}</h3>
-          <p>Precio: {{ dispositivo.precio_disp }}</p>
-        </div>
-    </li>
-    {% endfor %}
-</ul>
-
+{% if lista_dispositivo %}
+  <br>
+  <ul class="thumbnails" style="text-align:center;">
+     {% for dispositivo in lista_dispositivo %}
+     <li class="">
+          <div class="thumbnail">
+            <a href="/dispositivo/?d={{ dispositivo.nombre_produc }}"><img border="2" src="{{ MEDIA_URL }}/{{ dispositivo.imagen_disp }}" alt="dispositivo.nombre_produc"/></a>
+            <a href="/dispositivo/?d={{ dispositivo.nombre_produc }}"><h3>{{  dispositivo.nombre_produc }}</h3></a>
+            <p>Precio: {{ dispositivo.precio_disp }}</p>
+            <p>Marca: {{ dispositivo.marca_disp }}</p>
+          </div>
+      </li>
+      {% endfor %}
+  </ul>
+{% else %}
+  <br><br><br>
+  <p class="muted offset2">No hay dispositivos en la categoria seleccionada.</p>
+{% endif %}
 <script src="/media/js/jquery.min.js"></script>
 <script src="/media/js/plugins.js" type="text/javascript" charset="utf-8"></script>
 <script src="/media/chosen/chosen.jquery.js" type="text/javascript"></script>
