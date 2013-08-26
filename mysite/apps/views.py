@@ -28,6 +28,12 @@ Buscarlo en "making queries"
 
 ########################## Home ###############################
 ############------------------------------------###############
+def userAdministra(user):
+    return user.is_superuser
+
+def userEsEmpleado(user):
+    return user.is_staff
+
 def index_view(request):
 	lista = Dispositivo.objects.filter(destacado=True)
 	ctx = {'lista_categorias': Tipo.objects.all().order_by('nombre_tipo'),'lista_dispositivo':lista}
@@ -140,10 +146,38 @@ def servicios_view(request):
 	ctx = {'lista_servicios':lista_servicios,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 	return render_to_response('home/navegacion/servicios.html',ctx,context_instance = RequestContext(request))
 
+@user_passes_test(userAdministra)
 def abast_view(request):
 	lista_stock = Abastecimiento.objects.all().order_by('fecha')
 	ctx = {'lista_stock':lista_stock,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 	return render_to_response('home/admin/abastecimiento.html',ctx,context_instance = RequestContext(request))
+
+@user_passes_test(userAdministra)
+def ventas_view(request):
+	lista_ventas = OrdenDeVenta.objects.all()
+	if request.method == 'POST':
+		orden_v = request.POST['orden_venta']
+		orden_venta = OrdenDeVenta.objects.get(id = orden_v)
+		lista_detalles_venta = DetalleVenta.objects.filter(orden_de_venta = orden_venta)
+		ctx = {'lista_detalles_venta':lista_detalles_venta,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+		return render_to_response('home/admin/ventas.html',ctx,context_instance = RequestContext(request))
+	else:
+		ctx = {'lista_ventas':lista_ventas,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+		return render_to_response('home/admin/ventas.html',ctx,context_instance = RequestContext(request))
+
+@user_passes_test(userAdministra)
+def compras_view(request):
+	lista_compras = OrdenDeCompra.objects.all()
+	if request.method == 'POST':
+		orden_c = request.POST['orden_compra']
+		orden_compra = OrdenDeCompra.objects.get(id = orden_c)
+		lista_detalles_compra = DetalleCompra.objects.filter(orden_de_compra = orden_compra)
+		ctx = {'lista_detalles_compra':lista_detalles_compra,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+		return render_to_response('home/admin/compras.html',ctx,context_instance = RequestContext(request))
+	else:
+		ctx = {'lista_compras':lista_compras,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+		return render_to_response('home/admin/compras.html',ctx,context_instance = RequestContext(request))
+
 ############------------------------------------###############
 ########################## Home ###############################
 
@@ -282,12 +316,6 @@ def logout_view(request):
 	# Redirect to a success page.
 	return HttpResponseRedirect("/home/")
 
-def userAdministra(user):
-    return user.is_superuser
-
-def userEsEmpleado(user):
-    return user.is_staff
-
 ##########------------------------------------##############
 ###################### registro ############################
 
@@ -330,6 +358,7 @@ def eliminar_carrito(usuario):
 		return False
 
 def agOrdenVenta(usuario):
+	nombre_usuario=usuario.username
 	carrito = Carrito.objects.filter(carrito_usuario = nombre_usuario)
 	#Verificamos stock
 	stock_insuficiente = []
@@ -349,7 +378,7 @@ def agOrdenVenta(usuario):
 			stock_nuevo = stock_antiguo - Carrito.objects.get(carrito_usuario = nombre_usuario,carrito_disp = disp).cantidad
 			update_disp = Dispositivo.objects.filter(id = disp.id).update(cantidad_disp = stock_nuevo)
 		usuario = User.objects.get(username = nombre_usuario)
-		nueva_orden = OrdenDeVenta(cliente = usuario,precio_total_empleado = precio_final, precio_final_empleado = precio_final)
+		nueva_orden = OrdenDeVenta(empleado = usuario,precio_total_empleado = precio_final, precio_final_empleado = precio_final)
 		nueva_orden.save()
 		#Almacenamos en tabla DetalleVenta
 		for dispositivo in carrito:
@@ -361,7 +390,7 @@ def agOrdenVenta(usuario):
 		return False
 
 def agOrdenCompra(usuario):
-	nombre_usuario = request.user.username
+	nombre_usuario=usuario.username
 	carrito = Carrito.objects.filter(carrito_usuario = nombre_usuario)
 	#Verificamos stock
 	stock_insuficiente = []
@@ -397,10 +426,12 @@ def carrito_view(request):
 	if request.method == 'POST':
 		if 'resta' in request.POST:
 			dispositivo = request.POST['resta_disp']
+			print dispositivo
 			elCarrito(request.user.username,Dispositivo.objects.get(nombre_produc=dispositivo).id,1)
 	if request.method == 'POST':
 		if 'suma' in request.POST:
 			dispositivo = request.POST['suma_disp']
+			print dispositivo
 			agCarrito(request.user.username,Dispositivo.objects.get(nombre_produc=dispositivo).id,1)
 	if request.method == 'POST':
 		if 'compra' in request.POST:
@@ -408,10 +439,10 @@ def carrito_view(request):
 				lista_disp=agOrdenVenta(User.objects.get(username=request.user.username))
 			else:
 				lista_disp=agOrdenCompra(User.objects.get(username=request.user.username))
-			lista_carrito=Carrito.objects.filter(carrito_usuario=request.user.username)
+			lista_carrito=Carrito.objects.filter(carrito_usuario=request.user.username).order_by('carrito_disp')
 			ctx={'lista_disp':lista_disp,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo'),'lista_carrito':lista_carrito}
 			return render_to_response('home/carrito/cart.html',ctx,context_instance = RequestContext(request))
-	lista_carrito=Carrito.objects.filter(carrito_usuario=request.user.username)
+	lista_carrito=Carrito.objects.filter(carrito_usuario=request.user.username).order_by('carrito_disp')
 	ctx={'lista_categorias': Tipo.objects.all().order_by('nombre_tipo'),'lista_carrito':lista_carrito}
 	return render_to_response('home/carrito/cart.html',ctx,context_instance = RequestContext(request))
 ##########------------------------------------##############

@@ -31,17 +31,17 @@
 </div>
 {% if user.is_authenticated %}
 <div class="offset2 span5">
-<!--   <div class="span6">
-    <form action="." method="POST">
+  <div class="span6">
+<!--     <form action="." method="POST">
       <input hidden name="disp_disp" value={{ disp.id }}>
       <input hidden name="armado" value="True">
       {% csrf_token %}
       <input type="submit" class="btn btn-warning" name="submit" style="font-weight:bold;" value="Agregar al Armado">
-    </form>
-  </div> -->
+    </form> -->
+  </div>
   <div class="span6">
     <form action="." method="POST">
-      <input hidden name="carro_disp" value={{ disp.id }}>
+      <input hidden name="carro_disp" value="{{ disp.id }}">
       <input hidden name="carro" value="True">
       {% csrf_token %}
       <input {% if disp.cantidad_disp == 0 %} disabled {% endif %} type="submit" class="btn btn-success pull-right" name="submit" style="font-weight:bold;" value="Agregar al Carrito">

@@ -1,0 +1,47 @@
+{% extends 'template.html' %}
+{% block title %} Ventas | Chipset Management {% endblock %}
+
+{% block barraSuperior %}
+<div class="breadcrumb" style="background-color:white;">
+  <li><a href="{% url 'index' %}">Home</a><span class="divider">|</span></li>
+  <li><a href="https://www.facebook.com/pages/radal-computacion/122875447789596">Faceboook</a></li>
+</div>
+{% endblock %}
+
+{% block contenido %}
+<span id="menu" class="span9"><h2 style="text-align:center;">Ventas</h2></span><br><br><br><br><br><br>
+
+{% if lista_detalles_venta %}
+<div class="offset1 span7">
+    <table class="table table-bordered">
+        {% for venta in lista_detalles_venta %}
+            <tr><th>{{ venta.dispositivo_venta }}</th><td>{{ venta.cantidad_disp_venta }}</td></tr>
+        {% endfor %}
+    </table>
+    <a class="btn btn-warning pull-right" href="/ventas/" role="button"><i class="icon-chevron-left icon-white"></i> <b>Atrás</b></a>
+</div>
+
+{% else %}
+{% if lista_ventas %}
+<br>
+<div class="offset1 span7">
+  <table class="table table-bordered">
+    <tr><th>Empleado</th><td>Fecha</td><td>Precio</td><td></td></tr>
+        {% for venta in lista_ventas %}
+            <tr><th>{{ venta.empleado }}</th><td>{{ venta.fecha_venta }}</td><td>{{ venta.precio_final_empleado }}</td>
+                <td>
+                    <form action="." method="POST">
+                        <input hidden name="orden_venta" value="{{ venta.id }}">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-inverse pull-right" name="submit" style="font-weight:bold;" value="Detalle">
+                    </form></td>
+            </tr>
+        {% endfor %}
+  </table>
+</div>
+{% else %}
+    <br><br><br>
+    <p class="muted offset2">Aún no hay ventas almacenadas en la base de datos.</p>
+{% endif %}
+{% endif %}
+{% endblock %}

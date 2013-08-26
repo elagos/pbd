@@ -1,6 +1,8 @@
 from django.contrib import admin
 from mysite.apps.models import *
 
+admin.site.register(DetalleCompra)
+admin.site.register(DetalleVenta)
 admin.site.register(OrdenDeCompra)
 admin.site.register(OrdenDeVenta)
 admin.site.register(Carrito)

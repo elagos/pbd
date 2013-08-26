@@ -23,7 +23,7 @@
             <tr><th>{{ carro.carrito_disp }}</th><td>{{ carro.cantidad }}</td>
                 <td>
                     <form action="." method="POST">
-                        <input hidden name="resta_disp" value={{ carro.carrito_disp }}>
+                        <input hidden name="resta_disp" value="{{ carro.carrito_disp }}">
                         <input hidden name="resta" value="True">
                         {% csrf_token %}
                         <input type="submit" class="btn btn-danger pull-right" name="submit" style="font-weight:bold;" value="-">
@@ -31,7 +31,7 @@
                 </td>
                 <td>
                     <form action="." method="POST">
-                        <input hidden name="suma_disp" value={{ carro.carrito_disp }}>
+                        <input hidden name="suma_disp" value="{{ carro.carrito_disp }}">
                         <input hidden name="suma" value="True">
                         {% csrf_token %}
                         <input type="submit" class="btn btn-primary pull-right" name="submit" style="font-weight:bold;" value="+">
@@ -41,7 +41,6 @@
         {% endfor %}
   </table>
     <form action="." method="POST">
-        <input hidden name="disp_disp" value={{ disp.id }}>
         <input hidden name="compra" value="True">
         {% csrf_token %}
         <input type="submit" class="btn btn-success pull-right" name="submit" style="font-weight:bold;" value="Comprar">
@@ -49,6 +48,6 @@
 </div>
 {% else %}
     <br><br><br>
-  <p class="muted offset2">Tu carro de compra está vacio. ¿Que esperas para llenarlo?.</p>
+  <p class="muted offset2">Tu carro de compra está vacio. ¿Qué esperas para llenarlo?.</p>
 {% endif %}
 {% endblock %}

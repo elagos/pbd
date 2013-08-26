@@ -10,6 +10,8 @@ urlpatterns = patterns('mysite.apps.views',
     url(r'^dispositivo/$','dispositivo_view', name='dispositivo'),
     url(r'^servicios/$','servicios_view', name='servicios'),
     url(r'^abast/$','abast_view', name='abast'),
+    url(r'^compras/$','compras_view', name='compras'),
+    url(r'^ventas/$','ventas_view', name='ventas'),
 
     #url(r'^menuA//$','_view',name=''),
 
