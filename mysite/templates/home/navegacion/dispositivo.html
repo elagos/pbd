@@ -11,7 +11,12 @@
 {% block contenido %}
 <span id="menu" class="span9"><h2 style="text-align:center;">{{disp.nombre_produc}}</h2></span><br><br><br><br><br><br>
 
-
+{% if var %}
+<div class="alert alert-success">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <strong><i class="icon-ok-circle"></i> Cambio Realizado!</strong> {{ var }}
+</div>
+{% endif %}
 <br>
 <div class="offset2 span5">
   <table class="table table-bordered">
@@ -23,7 +28,25 @@
     <tr><th>Disponibilidad:</th><td>{{ disp.cantidad_disp }}</td></tr>
     <tr><th>Descripción:</th><td>{{ disp.descrip_disp }}</td></tr>
   </table>
-  <a class="btn btn-warning" href="" role="button"><b>Agregar al armado</b></a>
-  <a class="btn btn-success pull-right" href="" role="button"><b>Agregar al carrito</b></a>
 </div>
+{% if user.is_authenticated %}
+<div class="offset2 span5">
+<!--   <div class="span6">
+    <form action="." method="POST">
+      <input hidden name="disp_disp" value={{ disp.id }}>
+      <input hidden name="armado" value="True">
+      {% csrf_token %}
+      <input type="submit" class="btn btn-warning" name="submit" style="font-weight:bold;" value="Agregar al Armado">
+    </form>
+  </div> -->
+  <div class="span6">
+    <form action="." method="POST">
+      <input hidden name="carro_disp" value={{ disp.id }}>
+      <input hidden name="carro" value="True">
+      {% csrf_token %}
+      <input {% if disp.cantidad_disp == 0 %} disabled {% endif %} type="submit" class="btn btn-success pull-right" name="submit" style="font-weight:bold;" value="Agregar al Carrito">
+    </form>
+  </div>
+</div>
+{% endif %}
 {% endblock %}

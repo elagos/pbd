@@ -1,14 +1,54 @@
-<table>
-    <tr>
-        <th>Product</th>
-        <th>Quantity</th>
-        <th>Total Price</th>
-    </tr>
-    {% for item in cart %}
-    <tr>
-        <td>{{ item.product.name }}</td>
-        <td>{{ item.quantity }}</td>
-        <td>{{ item.total_price }}</td>
-    </tr>
-    {% endfor %}
-</table>
+{% extends 'template.html' %}
+{% block title %} Carrito | Chipset Management {% endblock %}
+
+{% block barraSuperior %}
+<div class="breadcrumb" style="background-color:white;">
+  <li><a href="{% url 'index' %}">Home</a><span class="divider">|</span></li>
+  <li><a href="https://www.facebook.com/pages/radal-computacion/122875447789596">Faceboook</a></li>
+</div>
+{% endblock %}
+
+{% block contenido %}
+<span id="menu" class="span9"><h2 style="text-align:center;">Carro de Compras</h2></span><br><br><br><br><br><br>
+
+{% if lista_disp %}
+    {{ lista_disp }}
+{% endif %}
+
+{% if lista_carrito %}
+<br>
+<div class="offset2 span5">
+  <table class="table table-bordered">
+        {% for carro in lista_carrito %}
+            <tr><th>{{ carro.carrito_disp }}</th><td>{{ carro.cantidad }}</td>
+                <td>
+                    <form action="." method="POST">
+                        <input hidden name="resta_disp" value={{ carro.carrito_disp }}>
+                        <input hidden name="resta" value="True">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-danger pull-right" name="submit" style="font-weight:bold;" value="-">
+                    </form>
+                </td>
+                <td>
+                    <form action="." method="POST">
+                        <input hidden name="suma_disp" value={{ carro.carrito_disp }}>
+                        <input hidden name="suma" value="True">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-primary pull-right" name="submit" style="font-weight:bold;" value="+">
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+  </table>
+    <form action="." method="POST">
+        <input hidden name="disp_disp" value={{ disp.id }}>
+        <input hidden name="compra" value="True">
+        {% csrf_token %}
+        <input type="submit" class="btn btn-success pull-right" name="submit" style="font-weight:bold;" value="Comprar">
+    </form>
+</div>
+{% else %}
+    <br><br><br>
+  <p class="muted offset2">Tu carro de compra está vacio. ¿Que esperas para llenarlo?.</p>
+{% endif %}
+{% endblock %}

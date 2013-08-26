@@ -1,0 +1,68 @@
+{% extends 'template.html' %}
+{% block title %} Búsqueda | Chipset Management {% endblock %}
+
+{% block barraSuperior %}
+<div class="breadcrumb" style="background-color:white;">
+  <li><a href="{% url 'index' %}">Home</a><span class="divider">|</span></li>
+  <li><a href="https://www.facebook.com/pages/radal-computacion/122875447789596">Faceboook</a></li>
+</div>
+{% endblock %}
+
+{% block contenido %}
+<span id="menu" class="span9"><h2 style="text-align:center;">Búsqueda: "{{ q }}"</h2></span><br><br><br><br><br><br>
+
+
+{% if lista_dispositivo %}
+	<div class="offset2">
+	    <form action="." method="POST">
+	        <select name = "orden" class="chosen-select" data-placeholder = "Ordenar por:"  style="width:200px;">
+	        	<option value = "-1"></option>
+	        	<option value = "1">Nombre</option>
+	        	<option value = "2">Marca</option>
+	        	<option value = "3">Precio</option>
+	        </select>
+	        <select name = "direcc" class="chosen-select" style="width:200px;">
+	        	<option value = "1">Ascendiente</option>
+	        	<option value = "2">Descendiente</option>
+	        </select>
+	        <input type="hidden" value = "{{ q }}" name="q">
+	        {% csrf_token %}
+	        <input type="submit" class="btn btn-inverse btn-small" name="submit" value="Ordenar">
+	    </form><br>
+	</div>
+
+	<ul class="thumbnails" style="text-align:center;">
+	 {% for dispositivo in lista_dispositivo %}
+	 <li class="">
+	      <div class="thumbnail">
+	        <a href="/dispositivo/?d={{ dispositivo.nombre_produc }}"><img style="min-width:150px;min-height:150px;max-width:150px;max-height:150px;" border="2" src="{{ MEDIA_URL }}/{{ dispositivo.imagen_disp }}" alt="dispositivo.nombre_produc"/></a>
+	        <a href="/dispositivo/?d={{ dispositivo.nombre_produc }}"><h5>{{  dispositivo.nombre_produc }}</h5></a>
+	        <p>Marca: {{ dispositivo.marca_disp }}</p>
+	        <p>Precio: {{ dispositivo.precio_disp }}</p>
+	        <p>Stock: {{ dispositivo.cantidad_disp }}</p>
+	      </div>
+	  </li>
+	  {% endfor %}
+	</ul>
+{% else %}
+	<br><br><br>
+	<p class="muted offset2">La búsqueda no calzó con ningun producto de la base de datos.</p>
+{% endif %}
+
+<script src="/media/js/jquery.min.js"></script>
+<script src="/media/js/plugins.js" type="text/javascript" charset="utf-8"></script>
+<script src="/media/chosen/chosen.jquery.js" type="text/javascript"></script>
+<script src="/media/chosen/docsupport/prism.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+    var config = {
+      '.chosen-select'           : {},
+      '.chosen-select-deselect'  : {allow_single_deselect:true},
+      '.chosen-select-no-single' : {disable_search_threshold:10},
+      '.chosen-select-no-results': {no_results_text:'No se encontró nada!'},
+      '.chosen-select-width'     : {width:"95%"}
+    }
+    for (var selector in config) {
+      $(selector).chosen(config[selector]);
+    }
+</script>
+{% endblock %}

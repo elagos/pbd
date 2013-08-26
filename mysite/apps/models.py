@@ -3,6 +3,8 @@
 from django.db import models
 from django.forms import ModelForm
 from django.core.files.storage import FileSystemStorage
+from django.contrib.auth.models import User
+from datetime import datetime
 
 CHOICES = (
     (True, "Si"),
@@ -40,6 +42,28 @@ class EquipoArmado(Producto):
 	def __unicode__(self):
 		return u'%s %s' % (self.precio_equipo, self.nombre_produc)
 
+class OrdenDeCompra(models.Model):
+	cliente = models.ForeignKey(User, related_name = "cliente_compra" ) 
+	fecha_compra = models.DateTimeField(default=datetime.now, blank=True)
+	precio_total_cliente = models.PositiveIntegerField()
+	precio_final_cliente = models.PositiveIntegerField()
+
+class OrdenDeVenta(models.Model):
+	empleado = models.ForeignKey(User, related_name = "empleado_venta") 
+	fecha_venta = models.DateTimeField(default=datetime.now, blank=True)
+	precio_total_empleado = models.PositiveIntegerField()
+	precio_final_empleado = models.PositiveIntegerField()
+
+class DetalleVenta(models.Model):
+	orden_de_venta = models.ForeignKey(OrdenDeVenta, related_name="venta_producto")
+	dispositivo_venta = models.ForeignKey(Producto, related_name = "dispositivo_venta")
+	cantidad_disp_venta = models.PositiveIntegerField()
+
+class DetalleCompra(models.Model):
+	orden_de_compra = models.ForeignKey(OrdenDeCompra, related_name="orden_producto")
+	dispositivo_compra = models.ForeignKey(Producto, related_name = "dispositivo_compra")
+	cantidad_disp_compra = models.PositiveIntegerField()
+
 class Tipo(models.Model):
 	nombre_tipo = models.CharField("nombre tipo",max_length = 100, blank = False)
 	armado_equipo = models.CharField("¿Se arman equipos con este categoría?",max_length = 10, choices = SI_NO_NULL)
@@ -73,6 +97,15 @@ class Dispositivo(Producto):
 
 	def __unicode__(self):
 		return u'%s' % (self.nombre_produc)
+
+class DetalleArmado(models.Model):
+       armado_usuario = models.CharField("usuario", max_length = 200)
+       armado_disp = models.ForeignKey(Dispositivo, related_name = 'disp_armado', null = True, blank = True)
+
+class Carrito(models.Model):
+       carrito_usuario = models.CharField("usuario", max_length = 200)
+       carrito_disp = models.ForeignKey(Dispositivo, related_name = 'disp_carrito')
+       cantidad = models.PositiveIntegerField("cantidad")
 
 class DetalleCaracteristica(models.Model):
 	caracteristica = models.ForeignKey(Caracteristica, verbose_name = "Caracteristica")

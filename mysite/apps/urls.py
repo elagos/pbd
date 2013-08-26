@@ -8,11 +8,12 @@ urlpatterns = patterns('mysite.apps.views',
     url(r'^categorias/$','categorias_view', name='categorias'),
     url(r'^search/$','search_view', name='search'),
     url(r'^dispositivo/$','dispositivo_view', name='dispositivo'),
+    url(r'^servicios/$','servicios_view', name='servicios'),
+    url(r'^abast/$','abast_view', name='abast'),
 
     #url(r'^menuA//$','_view',name=''),
 
     url(r'^carrito/$','carrito_view',name='carrito'),
-    url(r'^formcarrito/$','formularioCarrito_view',name='formularioCarrito'),
 
 # Menu Administrador
 #------------------------------------

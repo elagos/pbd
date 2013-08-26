@@ -1,58 +1,133 @@
-{% extends "template.html" %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Inicio de Sesión | Chipset Management </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="LokoHanks">
+    <!-- Todo el Estilo -->
+    <link href="/media/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/media/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" href="/media/chosen/chosen.css">
+    <script type="text/javascript" language="JavaScript">
+    NumberOfImagesToRotate = 6;
+    FirstPart = '<img src="/media/img/logo';
+    LastPart = '.png" alt="Chipset Management" height="90" width="180">';
+    function printImage(){
+      var r=Math.ceil(Math.random()*NumberOfImagesToRotate);
+      document.write(FirstPart+r+LastPart);}
+    </script>
+  </head>
+  <body>
 
-{% block title %} Login | Chipset Management {% endblock %}
+    <header class="btn btn-primary btn-block disabled">
+      <div class="container">
+        <h1>Chipset Management</h1>
+        <p class="lead">Radal Computación</p>
+      </div>
+    </header>
 
-{% block barraSuperior %}
-<div class="breadcrumb" style="background-color:white;">
-  <li><a href="{% url 'index' %}">Home</a><span class="divider">|</span></li>
-  <li><a href="">Servicios</a><span class="divider">|</span></li>
-  <li><a href="">Noticias</a><span class="divider">|</span></li>
-  <li><a href="">Promociones</a><span class="divider">|</span></li>
-  <li><a href="https://www.facebook.com/pages/radal-computacion/122875447789596">Faceboook</a></li>
-</div>
-{% endblock %}
+    <noscript>
+      <div class="alert alert-danger">
+        <strong><i class="icon-warning-sign"></i> Atención!</strong> Es necesario tener Javascript activado para utilizar todas las funciones de este sitio.
+      </div>
+    </noscript>
 
-{% block contenido %}
+    <div class="container-fluid well" style="background-color:white;border:none;">
+      <div class="row-fluid">
+        <div class="span2">
+          <div class="well well-small" style="background-color:white;">
+            <form>
+              <fieldset>
+                <legend>Cuenta</legend>
+                {% if user.is_superuser %}
+                  <p><a class="btn btn-inverse" href="/menuA/" role="button"><b>Menú Admin</b></a></p>
+                {% endif %}
+                {% if user.is_staff %}
+                  <p><a class="btn btn-inverse" href="/menuE/" role="button"><b>Menú Empleado</b></a></p>
+                {% endif %}
+                {% if user.is_authenticated %}
+                  <p><a class="btn btn-primary" href="/perfil/" role="button"><b>Perfil</b></a></p>
+                  <p><a class="btn btn-danger" href="/logout/" role="button"><b>Cerrar Sesión</b></a></p>
+                {% else %}
+                  <p><a class="btn btn-info" href="/registro/#menu" role="button"><b>Registrarse</b></a></p>
+                {% endif %}
 
-<span id="menu" class="span9"><h2 style="text-align:center;">Ingresar</h2></span><br><br><br><br><br><br>
+              </fieldset>
+            </form>
+          </div><!--Login-->
 
-{% if user.is_authenticated %}
-  <div class="alert alert-danger">
-    <button type="button" class="close" data-dismiss="alert">&times;</button>
-    <strong><i class="icon-user"></i> Ya hay una sesión iniciada!</strong> Puede cerrar esta sesión con el botón "Cerrar Sesión".
-  </div>
-  <p><a class="btn btn-primary" href="/logout/" role="button"><b>Cerrar Sesión</b></a></p>
-{% else %}
 
-  {% if next %}
-  <div class="alert alert-danger">
-    <button type="button" class="close" data-dismiss="alert">&times;</button>
-    <strong><i class="icon-warning-sign"></i> Atención!</strong> La página que está intentando ingresar requiere que inicie sesión.
-  </div>
-  {% endif %}
 
-  {% if registro %}
-  <div class="alert alert-success">
-    <button type="button" class="close" data-dismiss="alert">&times;</button>
-    <strong><i class="icon-warning-sign"></i> Cuenta creada!</strong> Ahora puede iniciar sesión.
-  </div>
-  {% endif %}
+        </div><!--Barra Lateral-->
 
-  {% if form.errors %}
-  <div class="alert alert-danger">
-    <button type="button" class="close" data-dismiss="alert">&times;</button>
-    <strong><i class="icon-warning-sign"></i> Login no válido!</strong> La combinación usuario/contraseña ingresada no es correcta.
-  </div>
-  {% endif %}
+        <div class="span10">
 
-  <form class="offset3" action="" method="post">
-    <input type="text" name="username" placeholder="Usuario" id="username"><br>
-    <input type="password" name="password" placeholder="Contraseña" id="password"><br>
-    {% csrf_token %}
-    <input type="submit" class="btn btn-success" style="font-weight:bold;" value="login"/><br>
-    <input type="hidden" name="next" value="{{ next|escape }}"/>
-  </form>
-  
-{% endif %}
+          <div class="span9" style="text-align:center;">
+            <div class="breadcrumb" style="background-color:white;">
+              <li><a href="{% url 'index' %}">Home</a><span class="divider">|</span></li>
+              <li><a href="https://www.facebook.com/pages/radal-computacion/122875447789596">Faceboook</a></li>
+            </div>
+          </div>
 
-{% endblock %}
+          <div class="span3 offset3">
+            <a href="{% url 'index' %}"><script type="text/javascript" language="JavaScript">printImage();</script></a>
+          </div><!--Best LAS-->
+
+          <br><br><br><br>
+          <div id="content" class="">
+            <span id="menu" class="span9"><h2 style="text-align:center;">Ingresar</h2></span><br><br><br><br><br><br>
+
+            {% if user.is_authenticated %}
+              <div class="alert alert-danger">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong><i class="icon-user"></i> Ya hay una sesión iniciada!</strong> Puede cerrar esta sesión con el botón "Cerrar Sesión".
+              </div>
+              <p><a class="btn btn-primary" href="/logout/" role="button"><b>Cerrar Sesión</b></a></p>
+            {% else %}
+
+              {% if next %}
+              <div class="alert alert-danger">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong><i class="icon-warning-sign"></i> Atención!</strong> La página que está intentando ingresar requiere que inicie sesión.
+              </div>
+              {% endif %}
+
+              {% if registro %}
+              <div class="alert alert-success">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong><i class="icon-warning-sign"></i> Cuenta creada!</strong> Ahora puede iniciar sesión.
+              </div>
+              {% endif %}
+
+              {% if form.errors %}
+              <div class="alert alert-danger">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong><i class="icon-warning-sign"></i> Login no válido!</strong> La combinación usuario/contraseña ingresada no es correcta.
+              </div>
+              {% endif %}
+
+              <form class="offset3" action="" method="post">
+                <input type="text" name="username" placeholder="Usuario" id="username"><br>
+                <input type="password" name="password" placeholder="Contraseña" id="password"><br>
+                {% csrf_token %}
+                <input type="submit" class="btn btn-success" style="font-weight:bold;" value="login"/><br>
+                <input type="hidden" name="next" value="{{ next|escape }}"/>
+              </form>
+              
+            {% endif %}
+          </div>
+            
+
+        </div><!--Contenido-->
+
+
+      </div><!--Row-->
+    </div><!--Container-->
+
+    <footer class="btn btn-primary btn-block disabled">
+        <p>&copy; 2013 Radal Computación, Ltda. &middot; <a style="color:white" href="">Privacidad</a> &middot; <a style="color:white;text-align:center" href="">Condiciones</a></p>
+    </footer>
+  </body>
+</html>

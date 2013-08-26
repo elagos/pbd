@@ -1,0 +1,29 @@
+{% extends 'template.html' %}
+{% block title %} Abastecimientos | Chipset Management {% endblock %}
+
+{% block barraSuperior %}
+<div class="breadcrumb" style="background-color:white;">
+  <li><a href="{% url 'index' %}">Home</a><span class="divider">|</span></li>
+  <li><a href="">Noticias</a><span class="divider">|</span></li>
+  <li><a href="">Promociones</a><span class="divider">|</span></li>
+  <li><a href="https://www.facebook.com/pages/radal-computacion/122875447789596">Faceboook</a></li>
+</div>
+{% endblock %}
+
+{% block contenido %}
+<span id="menu" class="span9"><h2 style="text-align:center;">Abastecimientos</h2></span><br><br><br><br><br><br>
+
+
+<br>
+{% if lista_stock %}
+  {% for stock in lista_stock %}
+  <div class="offset2 span5">
+    <table class="table table-bordered">
+      <tr><th>Producto:</th><td>{{ stock.producto_abast }}</td></tr>
+      <tr><th>Cantidad:</th><td>{{ stock.cant_abast }}</td></tr>
+      <tr><th>Fecha:</th><td>{{ stock.fecha }}</td></tr>
+    </table>
+  </div>
+  {% endfor %}
+{% endif %}
+{% endblock %}

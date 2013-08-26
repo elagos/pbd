@@ -4,9 +4,6 @@
 {% block barraSuperior %}
 <div class="breadcrumb" style="background-color:white;">
   <li class="active">Home<span class="divider">|</span></li>
-  <li><a href="#">Servicios</a><span class="divider">|</span></li>
-  <li><a href="#">Noticias</a><span class="divider">|</span></li>
-  <li><a href="#">Promociones</a><span class="divider">|</span></li>
   <li><a href="https://www.facebook.com/pages/radal-computacion/122875447789596">Faceboook</a></li>
 </div>
 {% endblock %}
@@ -21,10 +18,11 @@
      {% for dispositivo in lista_dispositivo %}
      <li class="">
           <div class="thumbnail">
-            <a href="/dispositivo/?d={{ dispositivo.nombre_produc }}"><img border="2" src="{{ MEDIA_URL }}/{{ dispositivo.imagen_disp }}" alt="dispositivo.nombre_produc"/></a>
-            <a href="/dispositivo/?d={{ dispositivo.nombre_produc }}"><h3>{{  dispositivo.nombre_produc }}</h3></a>
+            <a href="/dispositivo/?d={{ dispositivo.nombre_produc }}"><img style="min-width:150px;min-height:150px;max-width:150px;max-height:150px;" border="2" src="{{ MEDIA_URL }}/{{ dispositivo.imagen_disp }}" alt="dispositivo.nombre_produc"/></a>
+            <a href="/dispositivo/?d={{ dispositivo.nombre_produc }}"><h5>{{  dispositivo.nombre_produc }}</h5></a>
             <p>Precio: {{ dispositivo.precio_disp }}</p>
             <p>Marca: {{ dispositivo.marca_disp }}</p>
+            <p>Stock: {{ dispositivo.cantidad_disp }}</p>
           </div>
       </li>
       {% endfor %}

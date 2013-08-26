@@ -12,10 +12,12 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User,Group
+from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from mysite.apps.models import *
 from mysite.apps.forms import *
 from cart import Cart
+import datetime
 
 """
 Para cambiar tambien objetos relacionados, como nombre subtipos, se debe usar select_related()
@@ -27,11 +29,9 @@ Buscarlo en "making queries"
 ########################## Home ###############################
 ############------------------------------------###############
 def index_view(request):
-	productos = Producto.objects.all()
-	for prod in productos:
-		print prod.destacado
-	ctx = {'lista_categorias': Tipo.objects.all().order_by('nombre_tipo'),'lista_dispositivo':Producto.objects.filter(destacado='True')}
-	return render_to_response('home/index.html',ctx,context_instance=RequestContext(request))
+	lista = Dispositivo.objects.filter(destacado=True)
+	ctx = {'lista_categorias': Tipo.objects.all().order_by('nombre_tipo'),'lista_dispositivo':lista}
+	return render_to_response('home/navegacion/index.html',ctx,context_instance=RequestContext(request))
 
 def categorias_view(request):
 	if request.method == 'POST':
@@ -61,7 +61,7 @@ def categorias_view(request):
 				for disp in dispositivo:
 					lista_dispositivo.append(disp)
 		ctx = {'lista_subtipo':lista_subtipos_hijos,'lista_dispositivo':lista_dispositivo,'nombre':nombre,'lista_subtipos_hijos':lista_subtipos_hijos,'categoria':categoria,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
-		return render_to_response('home/categorias.html',ctx, context_instance = RequestContext(request))
+		return render_to_response('home/navegacion/categorias.html',ctx, context_instance = RequestContext(request))
 	if request.method == 'GET':
 		if 'tipo' in request.GET:
 			nombre = request.GET['tipo']
@@ -78,7 +78,7 @@ def categorias_view(request):
 						for disp in dispositivo:
 							lista_dispositivo.append(disp)
 				ctx = {'lista_dispositivo':lista_dispositivo,'lista_subtipos_hijos':lista_subtipos_hijos,'nombre':nombre,'categoria':categoria,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
-				return render_to_response('home/categorias.html',ctx, context_instance = RequestContext(request))
+				return render_to_response('home/navegacion/categorias.html',ctx, context_instance = RequestContext(request))
 	return HttpResponseRedirect("/home/")
 
 def search_view(request):
@@ -99,26 +99,51 @@ def search_view(request):
 		if (orden==-1 or orden==1) and direcc==2:
 			lista_dispositivo=Dispositivo.objects.filter(nombre_produc__icontains=nombre).order_by('-nombre_produc')
 		ctx={'q':nombre,'lista_dispositivo':lista_dispositivo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
-		return render_to_response('home/busqueda.html',ctx,context_instance=RequestContext(request))
+		return render_to_response('home/navegacion/busqueda.html',ctx,context_instance=RequestContext(request))
 	if request.method == 'GET':
 		if 'q' in request.GET:
 				nombre = request.GET['q']
 				if nombre:
 					lista_dispositivo=Dispositivo.objects.filter(nombre_produc__icontains=nombre)
 					ctx={'q':nombre,'lista_dispositivo':lista_dispositivo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
-					return render_to_response('home/busqueda.html',ctx,context_instance=RequestContext(request))
+					return render_to_response('home/navegacion/busqueda.html',ctx,context_instance=RequestContext(request))
 	return HttpResponseRedirect("/home/")
 
 def dispositivo_view(request):
+	if request.method == 'POST':
+		if 'armado' in request.POST:
+			nombre=request.POST['disp_disp']
+			disp=Dispositivo.objects.get(id=nombre)
+			agCarrito(request.user.username,disp.id,1)
+			var="Dispositivo agregado a su armado"
+			ctx={'disp':disp,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo'),'var':var}
+			return render_to_response('home/navegacion/dispositivo.html',ctx,context_instance=RequestContext(request))
+		if 'carro' in request.POST:
+			nombre=request.POST['carro_disp']
+			disp=Dispositivo.objects.get(id=nombre)
+			agCarrito(request.user.username,disp.id,1)
+			var="Dispositivo agregado a su Carrito"
+			ctx={'disp':disp,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo'),'var':var}
+			return render_to_response('home/navegacion/dispositivo.html',ctx,context_instance=RequestContext(request))
 	if request.method == 'GET':
 		if 'd' in request.GET:
 				nombre = request.GET['d']
 				if nombre:
 					if Dispositivo.objects.filter(nombre_produc=nombre):
 						disp=Dispositivo.objects.get(nombre_produc=nombre)
-						ctx={'disp':disp,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
-						return render_to_response('home/dispositivo.html',ctx,context_instance=RequestContext(request))
-	return render_to_response('home.html',context_instance=RequestContext(request))
+						ctx={'disp':disp,'nombre':nombre,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+						return render_to_response('home/navegacion/dispositivo.html',ctx,context_instance=RequestContext(request))
+	return HttpResponseRedirect("/home/")
+
+def servicios_view(request):
+	lista_servicios = ServicioTecnico.objects.all()
+	ctx = {'lista_servicios':lista_servicios,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+	return render_to_response('home/navegacion/servicios.html',ctx,context_instance = RequestContext(request))
+
+def abast_view(request):
+	lista_stock = Abastecimiento.objects.all().order_by('fecha')
+	ctx = {'lista_stock':lista_stock,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
+	return render_to_response('home/admin/abastecimiento.html',ctx,context_instance = RequestContext(request))
 ############------------------------------------###############
 ########################## Home ###############################
 
@@ -256,6 +281,13 @@ def logout_view(request):
 	auth.logout(request)
 	# Redirect to a success page.
 	return HttpResponseRedirect("/home/")
+
+def userAdministra(user):
+    return user.is_superuser
+
+def userEsEmpleado(user):
+    return user.is_staff
+
 ##########------------------------------------##############
 ###################### registro ############################
 
@@ -263,30 +295,125 @@ def logout_view(request):
 
 ####################### Carrito ############################
 ##########------------------------------------##############
-def formularioCarrito_view(request):
-	if request.method == 'POST':
-		success = request.POST['optionsRadios']
-		ctx = {'success':success,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
-		return render_to_response('home/carrito/formularioCarrito.html',ctx,context_instance = RequestContext(request))# Fin Menu Administrador
-	return render_to_response('home/carrito/formularioCarrito.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))# Fin Menu Administrador
+def agCarrito(usuario,id_dispositivo,cantidad):
+	dispositivo = Dispositivo.objects.get(id = id_dispositivo)
+	carrito_disp = Carrito.objects.filter(carrito_usuario = usuario, carrito_disp = dispositivo)
+	#Si ya se agregó ese dispositivo al carrito
+	if carrito_disp.count()>0:
+		cantidad_antigua = Carrito.objects.get(carrito_usuario = usuario, carrito_disp = dispositivo).cantidad
+		cantidad_total = cantidad_antigua + cantidad
+		add_cant = carrito_disp.update(cantidad = cantidad_total)
+		return True
+	else:
+		carrito_disp_nuevo = Carrito(carrito_usuario = usuario, carrito_disp = dispositivo,cantidad = cantidad)
+		carrito_disp_nuevo.save()
+		return True
+	return False
 
+def elCarrito(usuario,id_dispositivo,cantidad):
+	dispositivo = Dispositivo.objects.get(id = id_dispositivo)
+	carrito_disp = Carrito.objects.filter(carrito_usuario = usuario, carrito_disp = dispositivo)
+	cantidad_antigua = Carrito.objects.get(carrito_usuario = usuario, carrito_disp = dispositivo).cantidad
+	cantidad_total = cantidad_antigua - cantidad
+	if cantidad_total == 0:
+		eliminar_carrito = carrito_disp.delete()
+		return True
+	restar_cant = carrito_disp.update(cantidad = cantidad_total)
+	return True
 
-def addCarrito(numerito):
-	numerito = numerito * 2
-	return numerito
+def eliminar_carrito(usuario):
+	carrito = Carrito.objects.filter(carrito_usuario = usuario)
+	if carrito.count()>0:
+		delete_carrito = carrito.delete()
+		return True
+	else:
+		return False
 
-def add_to_cart(request,product_id, quantity):
-	product = Dispositivo.objects.get(nombre_produc=product_id)
-	cart = Cart(request)
-	cart.add(product, product.precio_disp, quantity)
+def agOrdenVenta(usuario):
+	carrito = Carrito.objects.filter(carrito_usuario = nombre_usuario)
+	#Verificamos stock
+	stock_insuficiente = []
+	for disp in carrito:
+		dispositivo = disp.carrito_disp
+		if disp.cantidad > dispositivo.cantidad_disp:
+			stock_insuficiente.append(dispositivo)
+	if stock_insuficiente:
+		return stock_insuficiente
+	#Si todos los stocks alcanzan
+	precio_final = 0
+	if not stock_insuficiente:
+		for dispositivo in carrito:
+			disp = dispositivo.carrito_disp
+			precio_final = precio_final + disp.precio_disp
+			stock_antiguo = disp.cantidad_disp
+			stock_nuevo = stock_antiguo - Carrito.objects.get(carrito_usuario = nombre_usuario,carrito_disp = disp).cantidad
+			update_disp = Dispositivo.objects.filter(id = disp.id).update(cantidad_disp = stock_nuevo)
+		usuario = User.objects.get(username = nombre_usuario)
+		nueva_orden = OrdenDeVenta(cliente = usuario,precio_total_empleado = precio_final, precio_final_empleado = precio_final)
+		nueva_orden.save()
+		#Almacenamos en tabla DetalleVenta
+		for dispositivo in carrito:
+			disp = dispositivo.carrito_disp
+			cant = Carrito.objects.get(carrito_usuario = nombre_usuario,carrito_disp = disp).cantidad
+			nuevo_detalle = DetalleVenta(orden_de_venta = nueva_orden, dispositivo_venta = disp ,cantidad_disp_venta = cant)
+			nuevo_detalle.save()
+		borrar_carrito = eliminar_carrito(nombre_usuario)
+		return False
 
-def remove_from_cart(request,product_id):
-	product = Producto.objects.get(id=product_id)
-	cart = Cart(request)
-	cart.remove(product)
+def agOrdenCompra(usuario):
+	nombre_usuario = request.user.username
+	carrito = Carrito.objects.filter(carrito_usuario = nombre_usuario)
+	#Verificamos stock
+	stock_insuficiente = []
+	for disp in carrito:
+		dispositivo = disp.carrito_disp
+		if disp.cantidad > dispositivo.cantidad_disp:
+			stock_insuficiente.append(dispositivo)
+	if stock_insuficiente:
+		return stock_insuficiente
+	#Si todos los stocks alcanzan
+	precio_final = 0
+	if not stock_insuficiente:
+		for dispositivo in carrito:
+			disp = dispositivo.carrito_disp
+			precio_final = precio_final + disp.precio_disp
+			stock_antiguo = disp.cantidad_disp
+			stock_nuevo = stock_antiguo - Carrito.objects.get(carrito_usuario = nombre_usuario,carrito_disp = disp).cantidad
+			update_disp = Dispositivo.objects.filter(id = disp.id).update(cantidad_disp = stock_nuevo)
+		usuario = User.objects.get(username = nombre_usuario)
+		nueva_orden = OrdenDeCompra(cliente = usuario,precio_total_cliente = precio_final, precio_final_cliente = precio_final)
+		nueva_orden.save()
+		#Se genera detalle de compra
+		for dispositivo in carrito:
+			disp = dispositivo.carrito_disp
+			cant = Carrito.objects.get(carrito_usuario = nombre_usuario,carrito_disp = disp).cantidad
+			nuevo_detalle = DetalleCompra(orden_de_compra = nueva_orden, dispositivo_compra = disp ,cantidad_disp_compra = cant)
+			nuevo_detalle.save()
+		borrar_carrito = eliminar_carrito(nombre_usuario)
+		return False
 
+@login_required
 def carrito_view(request):
-	return render_to_response('home/carrito/cart.html', dict(cart=Cart(request)))
+	if request.method == 'POST':
+		if 'resta' in request.POST:
+			dispositivo = request.POST['resta_disp']
+			elCarrito(request.user.username,Dispositivo.objects.get(nombre_produc=dispositivo).id,1)
+	if request.method == 'POST':
+		if 'suma' in request.POST:
+			dispositivo = request.POST['suma_disp']
+			agCarrito(request.user.username,Dispositivo.objects.get(nombre_produc=dispositivo).id,1)
+	if request.method == 'POST':
+		if 'compra' in request.POST:
+			if request.user.is_staff:
+				lista_disp=agOrdenVenta(User.objects.get(username=request.user.username))
+			else:
+				lista_disp=agOrdenCompra(User.objects.get(username=request.user.username))
+			lista_carrito=Carrito.objects.filter(carrito_usuario=request.user.username)
+			ctx={'lista_disp':lista_disp,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo'),'lista_carrito':lista_carrito}
+			return render_to_response('home/carrito/cart.html',ctx,context_instance = RequestContext(request))
+	lista_carrito=Carrito.objects.filter(carrito_usuario=request.user.username)
+	ctx={'lista_categorias': Tipo.objects.all().order_by('nombre_tipo'),'lista_carrito':lista_carrito}
+	return render_to_response('home/carrito/cart.html',ctx,context_instance = RequestContext(request))
 ##########------------------------------------##############
 ####################### Carrito ############################
 
@@ -295,9 +422,11 @@ def carrito_view(request):
 
 ################## Menu Administrador ######################
 ##########------------------------------------##############
+@user_passes_test(userAdministra)
 def menuA_view(request):
 	return HttpResponseRedirect("/menuA/admStock/")
 
+@user_passes_test(userAdministra)
 def admStock_view(request):
 	lista_dispositivo = Dispositivo.objects.all()
 	lista_subtipo = Subtipo.objects.all()
@@ -336,9 +465,11 @@ def admStock_view(request):
 	return render_to_response('home/menuA/admStock.html',ctx,context_instance=RequestContext(request))
 
 #### Dispositivos-------------------------------------
+@user_passes_test(userAdministra)
 def admDispositivos_view(request):
 	return render_to_response('home/menuA/admDispositivos/index.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance=RequestContext(request))
 
+@user_passes_test(userAdministra)
 def agDispositivo_view(request):# Agregar Dispositivo
 	lista_dispositivos = Dispositivo.objects.all()
 	if request.method == 'POST':
@@ -371,6 +502,7 @@ def agDispositivo_view(request):# Agregar Dispositivo
 		ctx={'agregarDispositivoForm':formulario,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admDispositivos/agDispositivo.html',ctx,context_instance=RequestContext(request))
 
+@user_passes_test(userAdministra)
 def elDispositivo_view(request):# Eliminar Dispositivo
 	lista_dispositivo = Dispositivo.objects.all().order_by('nombre_produc')
 	lista_subtipo = Subtipo.objects.all().order_by('nombre_subtipo')
@@ -392,6 +524,7 @@ def elDispositivo_view(request):# Eliminar Dispositivo
 		id_disp = int(request.POST['id_dispositivo'])
 		formulario = dispositivoForm(instance = Dispositivo.objetcs.get(id = id_disp))
 
+@user_passes_test(userAdministra)
 def edDispositivo_view(request):# Editar Dispositivo
 	lista = Dispositivo.objects.all().order_by('nombre_produc')
 	lista_subtipo = Subtipo.objects.all().order_by('nombre_subtipo')
@@ -462,22 +595,28 @@ def edDispositivo_view(request):# Editar Dispositivo
 		return render_to_response('home/menuA/admDispositivos/edDispositivo.html',ctx, context_instance = RequestContext(request))
 
 #### Equipos Armados-------------------------------------
+@user_passes_test(userAdministra)
 def admEArmados_view(request):
 	return render_to_response('home/menuA/admEArmados/index.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance=RequestContext(request))
 
+@user_passes_test(userAdministra)
 def agEquipo_view(request):# Agregar Equipo
 	return render_to_response('home/menuA/admEArmados/agEquipo.html',context_instance=RequestContext(request))
 
+@user_passes_test(userAdministra)
 def elEquipo_view(request):# Eliminar Equipo
 	return render_to_response('home/menuA/admEArmados/elEquipo.html',context_instance=RequestContext(request))
 
+@user_passes_test(userAdministra)
 def edEquipo_view(request):# Editar Equipo
 	return render_to_response('home/menuA/admEArmados/edEquipo.html',context_instance=RequestContext(request))
 
 #### Servicios Técnicos------------------------------------------
+@user_passes_test(userAdministra)
 def admSTecnicos_view(request):
 	return render_to_response('home/menuA/admSTecnicos/index.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance=RequestContext(request))
 
+@user_passes_test(userAdministra)
 def agSTecnico_view(request):# Agregar STecnico
 	if request.method == 'POST':
 		formulario = servicioForm(request.POST)
@@ -510,6 +649,7 @@ def agSTecnico_view(request):# Agregar STecnico
 		ctx={'agregarServicioForm':formulario,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admSTecnicos/agSTecnico.html',ctx,context_instance=RequestContext(request))
 
+@user_passes_test(userAdministra)
 def elSTecnico_view(request):# Eliminar STecnico
 	lista_servicios = ServicioTecnico.objects.all().order_by('nombre_serv')
 	if request.method == 'POST':
@@ -527,6 +667,7 @@ def elSTecnico_view(request):# Eliminar STecnico
 		ctx = {'lista_servicios':lista_servicios,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admSTecnicos/elSTecnico.html',ctx,context_instance = RequestContext(request))
 
+@user_passes_test(userAdministra)
 def edSTecnico_view(request):# Editar STecnico
 	lista = ServicioTecnico.objects.all().order_by('nombre_serv')
 	if request.method == 'POST':
@@ -575,9 +716,11 @@ def edSTecnico_view(request):# Editar STecnico
 		return render_to_response('home/menuA/admSTecnicos/edSTecnico.html',ctx, context_instance = RequestContext(request))
 
 #### Compatibilidades------------------------------------------
+@user_passes_test(userAdministra)
 def admCompatibilidades_view(request):
 	return render_to_response('home/menuA/admCompatibilidades/index.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance=RequestContext(request))
 
+@user_passes_test(userAdministra)
 def agCompatibilidad_view(request):# Agregar Compatibilidad
 	lista_dispositivo = Dispositivo.objects.all()
 	lista_subtipo = Subtipo.objects.all()
@@ -614,6 +757,7 @@ def agCompatibilidad_view(request):# Agregar Compatibilidad
 		ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'lista_compt':lista_compt,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 	return render_to_response('home/menuA/admCompatibilidades/agCompatibilidad.html',ctx,context_instance = RequestContext(request))
 
+@user_passes_test(userAdministra)
 def elCompatibilidad_view(request):# Eliminar Compatibilidad
 	lista_dispositivo_compat = Compatibilidad.objects.all()
 	lista_subtipo = Subtipo.objects.all()
@@ -673,6 +817,7 @@ def elCompatibilidad_view(request):# Eliminar Compatibilidad
 		ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 	return render_to_response('home/menuA/admCompatibilidades/elCompatibilidad.html',ctx,context_instance = RequestContext(request))
 
+@user_passes_test(userAdministra)
 def agIncompatibilidad_view(request):# Agregar Incompatibilidad
 	lista_dispositivo = Dispositivo.objects.all()
 	lista_subtipo = Subtipo.objects.all()
@@ -704,6 +849,7 @@ def agIncompatibilidad_view(request):# Agregar Incompatibilidad
 		ctx = {'lista_dispositivo':lista_dispositivo, 'lista_subtipo':lista_subtipo,'incompatibilidad':incompatibilidad,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 	return render_to_response('home/menuA/admCompatibilidades/agIncompatibilidad.html',ctx,context_instance = RequestContext(request))
 
+@user_passes_test(userAdministra)
 def elIncompatibilidad_view(request):# Eliminar Incompatibilidad
 	lista_dispositivo_incompat = Incompatibilidad.objects.all()
 	lista_subtipo = Subtipo.objects.all()
@@ -776,9 +922,11 @@ def elIncompatibilidad_view(request):# Eliminar Incompatibilidad
 	return render_to_response('home/menuA/admCompatibilidades/elIncompatibilidad.html',ctx,context_instance = RequestContext(request))
 
 #### Tipos y Subtipos-------------------------------------
+@user_passes_test(userAdministra)
 def admTySubtipos_view(request):
 	return render_to_response('home/menuA/admTySubtipos/index.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance=RequestContext(request))
 
+@user_passes_test(userAdministra)
 def agTipo_view(request):# Agregar Tipo
 	global lista_tipos
 	lista_tipos = Tipo.objects.all()
@@ -812,6 +960,7 @@ def agTipo_view(request):# Agregar Tipo
 		ctx={'agregarTipoForm':formulario,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admTySubtipos/agTipo.html',ctx, context_instance = RequestContext(request))
 
+@user_passes_test(userAdministra)
 def elTipo_view(request):# Eliminar Tipo
 	lista_tipos = Tipo.objects.all().order_by('nombre_tipo')
 	if request.method == 'POST':
@@ -829,6 +978,7 @@ def elTipo_view(request):# Eliminar Tipo
 		ctx = {'lista_tipos':lista_tipos,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admTySubtipos/elTipo.html',ctx,context_instance = RequestContext(request))
 
+@user_passes_test(userAdministra)
 def edTipo_view(request):# Editar Tipo
 	lista = Tipo.objects.all().order_by('nombre_tipo')
 	if request.method == 'POST':
@@ -867,6 +1017,7 @@ def edTipo_view(request):# Editar Tipo
 		ctx = {'lista':lista,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admTySubtipos/edTipo.html',ctx, context_instance = RequestContext(request))
 
+@user_passes_test(userAdministra)
 def agSTipo_view(request):# Agregar Subtipo
 	global lista_subtipos
 	lista_tipos = Tipo.objects.all().order_by('nombre_tipo')
@@ -917,6 +1068,7 @@ def agSTipo_view(request):# Agregar Subtipo
 		ctx ={'agregarSubtipoForm':formulario,'lista_tipos':lista_tipos,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admTySubtipos/agSTipo.html',ctx,context_instance=RequestContext(request))
 
+@user_passes_test(userAdministra)
 def elSTipo_view(request):# Eliminar Subtipo
 	lista_subtipos = Subtipo.objects.all().order_by('nombre_subtipo')
 	if request.method == 'POST':
@@ -935,6 +1087,7 @@ def elSTipo_view(request):# Eliminar Subtipo
 		ctx = {'lista_subtipos':lista_subtipos,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admTySubtipos/elSTipo.html',ctx,context_instance=RequestContext(request))
 
+@user_passes_test(userAdministra)
 def edSTipo_view(request):# Editar Subtipo
 	lista = Subtipo.objects.all().order_by('nombre_subtipo')
 	lista_tipo = Tipo.objects.all()
@@ -973,9 +1126,11 @@ def edSTipo_view(request):# Editar Subtipo
 		return render_to_response('home/menuA/admTySubtipos/edSTipo.html',ctx, context_instance = RequestContext(request))
 
 #### Empleados---------------------------------------
+@user_passes_test(userAdministra)
 def admEmpleados_view(request):
 	return render_to_response('home/menuA/admEmpleados/index.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance=RequestContext(request))
 
+@user_passes_test(userAdministra)
 def agEmpleado_view(request):# Agregar Empleado
 	if request.method == 'POST':
 		form = UserCreationForm(request.POST)
@@ -1006,6 +1161,7 @@ def agEmpleado_view(request):# Agregar Empleado
 		form = UserCreationForm()
 		return render_to_response('home/menuA/admEmpleados/agEmpleado.html', {'form': form,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance = RequestContext(request))
 
+@user_passes_test(userAdministra)
 def elEmpleado_view(request):# Editar Empleado
 	lista_empleados = User.objects.all().order_by('first_name')
 	if request.method == 'POST':
@@ -1023,6 +1179,7 @@ def elEmpleado_view(request):# Editar Empleado
 		ctx = {'lista_empleados':lista_empleados,'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')}
 		return render_to_response('home/menuA/admEmpleados/elEmpleado.html',ctx,context_instance = RequestContext(request))
 
+@user_passes_test(userAdministra)
 def edEmpleado_view(request):# Eliminar Empleado
 	lista_empleados = User.objects.all().order_by('first_name')
 	if request.method == 'POST':
@@ -1064,24 +1221,30 @@ def edEmpleado_view(request):# Eliminar Empleado
 		return render_to_response('home/menuA/admEmpleados/edEmpleado.html',ctx,context_instance = RequestContext(request))
 
 #### Asignar Armado---------------------------------------
+@user_passes_test(userAdministra)
 def asigArmado_view(request):
 	return render_to_response('home/menuA/asigArmado/index.html',context_instance=RequestContext(request))
 
+@user_passes_test(userAdministra)
 def asigServicio_view(request):
 	return render_to_response('home/menuA/asigServicio/index.html',context_instance=RequestContext(request))
 
+@user_passes_test(userAdministra)
 def confArmado_view(request):
 	return render_to_response('home/menuA/confArmado/index.html',context_instance=RequestContext(request))
 
+@user_passes_test(userAdministra)
 def confServicio_view(request):
 	return render_to_response('home/menuA/confServicio/index.html',context_instance=RequestContext(request))
 
+@user_passes_test(userAdministra)
 def regServicio_view(request):
 	return render_to_response('home/menuA/regServicio/index.html',context_instance=RequestContext(request))
 ##########------------------------------------##############
 ################## Menu Administrador ######################
 
 
+@user_passes_test(userEsEmpleado)
 def menuE_view(request):
 	return render_to_response('home/menuE.html',{'lista_categorias': Tipo.objects.all().order_by('nombre_tipo')},context_instance=RequestContext(request))
 
@@ -1093,6 +1256,27 @@ def menuE_view(request):
 #################################################################################
 ############   FUNCIONES EXTERNAS, NO RETORNAN NINGÚN TEMPLATE   ################
 #################################################################################
+
+def agDisp(usuario,id_dispositivo):
+	carro_armado = DetalleArmado.objects.filter(armado_usuario = usuario)
+	dispositivo = Dispositivo.objects.get(id = id_dispositivo)
+	agregar_disp = DetalleArmado(armado_usuario = usuario, armado_disp = dispositivo)
+	agregar_disp.save()
+	return True
+
+def elDispArmado(usuario,id_dispositivo):
+	carro_armado = DetalleArmado.objects.filter(armado_usuario = usuario)
+	dispositivo = Dispositivo.objects.get(id = id_dispositivo)
+	eliminar_disp = DetalleArmado.objects.filter(armado_usuario = usuario, armado_disp = dispositivo).delete()
+	return True
+
+def elArmado(usuario):
+	armado = DetalleArmado.objects.filter(armado_usuario = usuario)
+	if armado.count()>0:
+		eliminar = armado.delete()
+		return true
+	else:
+		return False
 
 #Función que consulta si el id que se le da tiene subtipos padres.
 #OJO. retorna una lista con todos los subtipos padres, donde el primer elemento es el tipo_padre!
